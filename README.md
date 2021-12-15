@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Predicting wildfires
 
  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -52,3 +53,6 @@ from within the project directory.
 ---
 
 Project template created by the [Cambridge AI4ER Cookiecutter](https://github.com/ai4er-cdt/ai4er-cookiecutter).
+=======
+# WildfireDistribution
+>>>>>>> 412c25b06b3cfb3fc5b862d55d08f3da58af6fb2
