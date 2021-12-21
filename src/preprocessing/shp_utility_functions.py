@@ -14,7 +14,7 @@ def extract_vertices(shape_file_path):
     return np.array(vertices)
     
 
-def crop_data_spatially(input_data, shape_file_path, zero_remap = 0):
+def crop_data_spatially(input_data, shape_file_path, zero_remap):
     """Crops input data to keep only the elements within the spatial bounds defined by the input shape file.
     
     Keyword arguments:
