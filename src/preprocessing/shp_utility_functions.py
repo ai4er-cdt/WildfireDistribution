@@ -1,4 +1,4 @@
-import geopandas as gpd
+import fiona
 import numpy as np
 import rioxarray as rxr
 
@@ -9,8 +9,11 @@ def extract_vertices(shape_file_path):
     shape_file_path -- realtive path where the shp and shx files are located (both required)
     """
     
-    polygons_df = gpd.read_file(shape_file_path)
-    vertices = list([list(coords) for coords in polygons_df.iloc[0]['geometry'].exterior.coords])
+    # Extract the vertices using fiona
+    with fiona.open(shape_file_path) as shape_data:
+        vertices = shape_data[0]['geometry']['coordinates'][0]
+        
+    # Return them as a numpy array
     return np.array(vertices)
     
 
