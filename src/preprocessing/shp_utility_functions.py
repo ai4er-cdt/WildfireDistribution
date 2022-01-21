@@ -28,9 +28,10 @@ def crop_data_spatially(input_data, shape_file_path, zero_remap):
     """
     
     # Check that zero_remap is the same type as the values in input_data
+    first_element = input_data.item(tuple(np.zeros(len(input_data.shape), int)))
     try:
-        if not ((isinstance(zero_remap, (int, np.integer)) and isinstance(input_data.values[0,0,0], (int, np.integer))) or
-                 (isinstance(zero_remap, (float, np.float64)) and isinstance(input_data.values[0,0,0], (float, np.float64)))):
+        if not ((isinstance(zero_remap, (int, np.integer)) and isinstance(first_element, (int, np.integer))) or
+                 (isinstance(zero_remap, (float, np.float64)) and isinstance(first_element, (float, np.float64)))):
             raise TypeError('The zero_remap value provided must match the type of the input data:', type(zero_remap), type(input_data.values.dtype)) 
     
     except TypeError as error:
