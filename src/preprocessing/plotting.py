@@ -9,7 +9,7 @@ import utils
 
 
 #: Plot output path (TODO: should be read from some file)
-plot_output_path = "/Users/hamishcampbell/Documents/Cambridge/Lent/GTC/WildfireDistribution/report/figures/"
+plot_output_path = "/home/users/hrac2/WildfireDistribution/report/figures/"
 
 def selected_months_JD(pp_modisJD, date, shape_root = None):
     """Saves a plot of the burn data corresponding to the chosen date.

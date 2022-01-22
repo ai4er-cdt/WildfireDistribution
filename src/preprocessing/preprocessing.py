@@ -1,9 +1,13 @@
 import ModisFireCCI as MF
+from datetime import datetime
 
+# Start the timer
+startTime = datetime.now()
+ 
 #: Variable paths (TODO: to be read from another file eventually)
 raw_data_path = "/home/users/hrac2/MODIS/"
-shape_path = "/Users/hamishcampbell/Documents/Cambridge/Lent/GTC/WildfireDistribution/src/data/ShapeFiles/"
-post_processed_path = "/Users/hamishcampbell/Documents/Cambridge/Lent/GTC/WildfireDistribution/src/data/PostProcessed/MODIS/"
+shape_path = "/home/users/hrac2/WildfireDistribution/src/data/ShapeFiles/"
+post_processed_path = "/home/users/hrac2/WildfireDistribution/src/data/PostProcessed/MODIS/"
 
 # Create data stack
 print("Populating...")
@@ -25,4 +29,4 @@ print('Plotting data...')
 fire_data.plot_hist_non_zero_proportion()
 
 # Alert user of task completion
-print('Finished.')
+print('Finished (', datetime.now() - startTime, ')')
