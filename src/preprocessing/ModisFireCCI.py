@@ -59,42 +59,36 @@ class PP_ModisFireCCI():
         self.root = root
       
 
-    def populate(self):
-        """Extract the relevant data from the root directory and store it within the object using a DataArray"""
+    def populate(self, shape_root, zero_remap=0):
+        """Extracts the relevant data from the root directory, crops it to an area of interest and stores it 
+           within the object using a DataArray stack with 'YYYYMM' as the index.
+           
+        Args:
+            shape_root: shape file (.shp) path
+            zero_remap: the new value that elements outside the spatial bounds (but not dropped from the output 
+                        DataArray) are mapped to after the crop has occurred
+           """
         
         # Populate a list of DataArrays using the seperate files
         dataArrays = []
         pathname = os.path.join(self.root, "**", self.filename_glob)
-        filename_regex = re.compile(self.filename_regex, re.VERBOSE)
         
-        # For each file found, index the data using the date it corresponds to
+        # For each file found:
         for filepath in glob.iglob(pathname, recursive=True):
+
+            # Read the data
             match = re.match(self.filename_regex, os.path.basename(filepath))
             data = rxr.open_rasterio(filepath)
+
+            # Crop the data
+            data = utils.crop_data_spatially(data, shape_root, zero_remap)
+
+            # Write the cropped data to the object
             data = data.assign_coords(date=match.group("date"))
             dataArrays.append(data)
             
         # Finally concatenate the DataArrays and store the result in the object     
         self.data = xr.concat(dataArrays, dim='date')
-        
-
-    def crop(self, shape_root, zero_remap=0):
-        """Crop the whole dataset spatially according to some shape files.
-        
-        Args:
-            shape_root: shape file (.shp) path
-            zero_remap: the new value that elements outside the spatial bounds (but not dropped from the output 
-                        DataArray) are mapped to after the crop has occurred
-                        
-        Raises:
-            ValueError: if object has not been populated with data before this function is called
-        """
-        
-        if self.data is None:
-            raise ValueError("The data is = None. Try calling 'populate' to assign the object data before making this call.") 
-
-        # Call the relevant utility function 
-        self.data = utils.crop_data_spatially(self.data, shape_root, zero_remap)
          
 
     def export(self, target_dir):
@@ -196,11 +190,11 @@ class PP_ModisJD(PP_ModisFireCCI):
         self.binary_flag = True
     
     
-    def plot(self, date_list, shape_root = None):
-        """Plots the data corresponding to each of the dates listed in date_list.
+    def plot(self, date, shape_root = None):
+        """Plots the data corresponding to the date chosen.
 
         Args: 
-            date_list: list of dates in the format "YYYYMM" that are requested for plotting
+            date: date in the format "YYYYMM" that is selected for plotting
             shape_root: shape file (.shp) path of training area (optional)
         
         Raises:
@@ -212,7 +206,7 @@ class PP_ModisJD(PP_ModisFireCCI):
         
         
         # Call the corresponding function written in the plotting script
-        plotting.selected_months_JD(self, date_list, shape_root)
+        plotting.selected_months_JD(self, date, shape_root)
     
 
 
@@ -230,11 +224,11 @@ class PP_ModisCL(PP_ModisFireCCI):
     filename_glob = "*CL.tif" 
     
     
-    def plot(self, date_list, shape_root = None):   
-        """Plots the data corresponding to each of the dates listed in date_list.
+    def plot(self, date, shape_root = None):   
+        """Plots the data corresponding to the date chosen.
 
         Args: 
-            date_list: list of dates in the format "YYYYMM" that are requested for plotting
+            date: date in the format "YYYYMM" that is selected for plotting
             shape_root: shape file (.shp) path of training area (optional)
         
         Raises:
@@ -245,5 +239,5 @@ class PP_ModisCL(PP_ModisFireCCI):
             raise ValueError("The data is = None. Try calling 'populate' to assign the object data before making this call.") 
         
         # Call the corresponding function written in the plotting script
-        plotting.selected_months_CL(self, date_list, shape_root)
+        plotting.selected_months_CL(self, date, shape_root)
 

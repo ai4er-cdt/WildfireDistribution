@@ -10,15 +10,10 @@ shape_path = "/home/users/hrac2/WildfireDistribution/src/data/ShapeFiles/"
 post_processed_path = "/home/users/hrac2/WildfireDistribution/src/data/PostProcessed/MODIS/"
 
 # Create data stack
-print("Populating...")
+print("Populating and cropping...")
 fire_data = MF.PP_ModisJD(raw_data_path) 
-fire_data.populate()
-print("Populated.")
-
-# Crop data stack
-print("Cropping...")
-fire_data.crop(shape_path+'whole_map.shp', -2)
-print("Cropped.")
+fire_data.populate(shape_path+'whole_map.shp', -2)
+print("Populated and cropped.")
 
 #: Plot monthly hist 
 # Create dict
