@@ -1,3 +1,7 @@
+import tarfile
+import os
+import dateutil
+
 
 def unzip_all_modis_fire_files(output_path):
     """Function pulls all modis fire data from CEDA archive within Jasmin from 2001 - 2020 and unzips it into output folder. Deals with different file structure for 2019 and 2007 folders. 
@@ -14,7 +18,12 @@ def unzip_all_modis_fire_files(output_path):
     
     #Check path exists 
     if os.path.isdir(output_path) is False:
-        os.makedirs(output_path)   
+        os.makedirs(output_path) 
+
+    # Check that annual folders exist also
+    for year in range(2001,2021):
+        if os.path.isdir(output_path+str(year)+'/') is False:
+            os.makedirs(output_path+str(year)+'/')   
     
     print('Output directory ready.')
     print('Creating list of files to pulll..')
@@ -43,16 +52,17 @@ def unzip_all_modis_fire_files(output_path):
             dat = dateutil.parser.parse(str(file_name[80:95].replace('/',' ')), fuzzy='yes')
             name = dat.strftime("%Y%m%d")
         file_id = '{0}-ESACCI-L3S_FIRE-BA-MODIS-AREA_3-fv5.1-LC.tif'.format(name)
+        year = name[:4]
         
         #check if file already unzipped
-        if file_id not in os.listdir(output_path):
+        if file_id not in os.listdir(output_path+year+'/'):
             
             #Open file
             file = tarfile.open(file_name)
 
             #Extracting file
-            file.extractall(output_path)
-
+            file.extractall(output_path+year+'/')
+            
             file.close()
 
     print('Unzipped all MODIS files, bye!')
