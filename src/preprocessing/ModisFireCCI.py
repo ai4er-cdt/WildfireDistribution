@@ -140,8 +140,11 @@ class PP_ModisFireCCI():
         return dict_proportions
 
 
-    def plot_hist_non_zero_proportion(self):
+    def plot_hist_non_zero_proportion(self, dict_proportions):
         """Plots the means/standard deviations of the proportion of non-zero pixels for each month.
+
+        Args:
+            dict_proportions: a dict of 'YYYYMM': proportions
                         
         Raises:
             ValueError: if object has not been populated with data before this function is called
@@ -149,10 +152,6 @@ class PP_ModisFireCCI():
         
         if self.data is None:
             raise ValueError("The data is = None. Try calling 'populate' to assign the object data before making this call.") 
-
-        
-        # Create non-zero proportion dict
-        dict_proportions = self.get_non_zero_proportion()
 
         # Call the corresponding function written in the plotting script
         plotting.monthly_histogram(dict_proportions)
