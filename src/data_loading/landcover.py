@@ -6,9 +6,9 @@ from rasterio.crs import CRS
 
 
 class LandcoverSimple(RasterDataset):
-  filename_glob = "*Simple.tif"
+    filename_glob = "*Simple.tif"
 
-  def __init__(
+    def __init__(
         self,
         root: str = None,
         crs: Optional[CRS] = None,
@@ -33,10 +33,11 @@ class LandcoverSimple(RasterDataset):
 
         super().__init__(root, crs, res, transforms, cache)
 
-class LandcoverComplex(RasterDataset):
-  filename_glob = "*Complex.tif"
 
-  def __init__(
+class LandcoverComplex(RasterDataset):
+    filename_glob = "*Complex.tif"
+
+    def __init__(
         self,
         root: str = None,
         crs: Optional[CRS] = None,

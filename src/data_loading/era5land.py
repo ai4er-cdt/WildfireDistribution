@@ -4,7 +4,6 @@ from typing import Any, Callable, Dict, Optional
 
 from rasterio.crs import CRS
 
-
 # info on ERA5 projection here:
 #
 # https://gis.stackexchange.com/questions/379877/convert-era5-data-to-wgs84
@@ -16,15 +15,15 @@ from rasterio.crs import CRS
 
 
 class ERA5Land(RasterDataset):
-  """Abstract class for all ERA5 Land datasets.
-  """
+    """Abstract class for all ERA5 Land datasets."""
+
 
 class ERA5SnowC(ERA5Land):
-  filename_glob = "era5_snowc_*.tiff"
-  filename_regex = "\S{11}(?P<date>\d{6})\S{7}"
-  date_format = "%Y%m"
+    filename_glob = "*snowc_*.tiff"
+    filename_regex = "\S{24}(?P<date>\d{6})\S{7}"
+    date_format = "%Y%m"
 
-  def __init__(
+    def __init__(
         self,
         root: str = None,
         # crs: Optional[CRS] = None,
@@ -52,11 +51,11 @@ class ERA5SnowC(ERA5Land):
 
 
 class ERA5SnowDepth(ERA5Land):
-  filename_glob = "era5_sd_*.tiff"
-  filename_regex = "\S{8}(?P<date>\d{6})\S{7}"
-  date_format = "%Y%m"
+    filename_glob = "*sd_*.tiff"
+    filename_regex = "\S{21}(?P<date>\d{6})\S{7}"
+    date_format = "%Y%m"
 
-  def __init__(
+    def __init__(
         self,
         root: str = None,
         # crs: Optional[CRS] = None,
@@ -81,13 +80,14 @@ class ERA5SnowDepth(ERA5Land):
         """
 
         super().__init__(root, crs, res, transforms, cache)
+
 
 class ERA5T2M(ERA5Land):
-  filename_glob = "era5_t2m_*.tiff"
-  filename_regex = "\S{9}(?P<date>\d{6})\S{7}"
-  date_format = "%Y%m"
+    filename_glob = "*t2m_*.tiff"
+    filename_regex = "\S{22}(?P<date>\d{6})\S{7}"
+    date_format = "%Y%m"
 
-  def __init__(
+    def __init__(
         self,
         root: str = None,
         # crs: Optional[CRS] = None,
@@ -113,12 +113,13 @@ class ERA5T2M(ERA5Land):
 
         super().__init__(root, crs, res, transforms, cache)
 
-class ERA5SWVL1(ERA5Land):
-  filename_glob = "era5_swvl1_*.tiff"
-  filename_regex = "\S{11}(?P<date>\d{6})\S{7}"
-  date_format = "%Y%m"
 
-  def __init__(
+class ERA5SWVL1(ERA5Land):
+    filename_glob = "*swvl1_*.tiff"
+    filename_regex = "\S{24}(?P<date>\d{6})\S{7}"
+    date_format = "%Y%m"
+
+    def __init__(
         self,
         root: str = None,
         # crs: Optional[CRS] = None,
