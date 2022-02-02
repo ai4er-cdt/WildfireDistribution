@@ -7,6 +7,20 @@ from rasterio.crs import CRS
 
 class LandcoverSimple(RasterDataset):
     filename_glob = "*Simple.tif"
+    is_image = False
+    
+    # Possible landcover classifications and corresponding values
+    classifications = {
+        "deciduous forests": 1,
+        "coniferous forests": 2,
+        "swamp forests": 3,
+        "meadows": 4,
+        "agriculture": 5,
+        "bogs and mires": 6,
+        "clearings and cuttings": 7,
+        "water": 8,
+        "urban": 9
+    }
 
     def __init__(
         self,
@@ -36,6 +50,24 @@ class LandcoverSimple(RasterDataset):
 
 class LandcoverComplex(RasterDataset):
     filename_glob = "*Complex.tif"
+    is_image = False
+    
+    # Possible landcover classifications and corresponding values
+    classifications = {
+        "pine, birch, wide leafed coniferous forests": 1,
+        "spruce forests": 2,
+        "oak, deciduous forests, small leaved deciduous forests": 3,
+        "alder forests": 4,
+        "birch forests": 5,
+        "deciduous indigenous swamp forests": 6,
+        "meadows": 7,
+        "agriculture (fields and hay pasture)": 8,
+        "raised bog": 9,
+        "fen and transitional mire": 10,
+        "forest cuttings and clearings, cleared ground outside of urban areas": 11,
+        "water": 12,
+        "urban, cleared ground in urban areas, buildings, and tarmac": 13
+    }
 
     def __init__(
         self,
