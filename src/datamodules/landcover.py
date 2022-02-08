@@ -85,9 +85,9 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         sample: Dict[str, Any],
     ) -> Dict[str, Any]:
 
-        x_shape = sample["mask"].shape
+        x_shape = sample["image"].shape
 
-        input_mask = sample["mask"]
+        input_mask = sample["image"]
         # Get the one-hot encodings, which are a tensor of: (batch_idx, lat, lon, band_idx)
         encodings = F.one_hot(
             input_mask.to(torch.int64), num_classes=len(self.simple_classes)
@@ -101,7 +101,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
 
         # Write one-hot encodings to the output tensor
         # outputs = sample
-        sample["mask"] = new_mask.to(torch.int32)
+        sample["image"] = new_mask.to(torch.int32)
 
         return sample
 

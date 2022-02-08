@@ -7,7 +7,10 @@ from rasterio.crs import CRS
 
 class LandcoverSimple(RasterDataset):
     filename_glob = "*Simple.tif"
-    is_image = False
+    
+    # this is not true strictly speaking, but keeping like this for now
+    # until we figure out how to handle this/how it fails
+    is_image = True
 
     # Possible landcover classifications and corresponding values
     classifications = {
