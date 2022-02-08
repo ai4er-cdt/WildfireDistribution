@@ -4,8 +4,6 @@ from typing import Any, Callable, Dict, Optional
 
 from rasterio.crs import CRS
 
-# import matplotlib.pyplot as plt
-
 
 class MODIS_CCI(RasterDataset):
     """Abstract class for all MODIS CCI datasets."""
@@ -15,7 +13,7 @@ class MODIS_JD(MODIS_CCI):
     filename_glob = "*JD.tif"
     filename_regex = "(?P<date>\d{6})\S{33}(?P<tile_number>\d).*"
     date_format = "%Y%m"
-    # is_image = False
+    is_image = False
     all_bands = ["Julian Day"]
 
     def __init__(

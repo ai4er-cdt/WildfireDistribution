@@ -1,5 +1,3 @@
 from .landcover import MODISJDLandcoverSimpleDataModule
 
-__all__ = (
-    "MODISJDLandcoverSimpleDataModule",
-)
+__all__ = ("MODISJDLandcoverSimpleDataModule",)

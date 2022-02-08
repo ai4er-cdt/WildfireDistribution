@@ -2,6 +2,7 @@ from ..data_loading import MODIS_JD, LandcoverSimple
 
 from typing import Any, Dict, Optional
 
+import torch
 import pytorch_lightning as pl
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
@@ -14,9 +15,13 @@ from torchgeo.datasets import BoundingBox
 class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
 
     # TODO: tune these hyperparams
-    length = 1000
-    stride = 128
-    
+    # stride is not trivial to choose
+    # patch_size - stride should approx equal
+    # the receptive field of a CNN
+
+    length = 100
+    stride = 0.01
+
     simple_classes = {
         "invalid": 0,
         "deciduous forests": 1,
@@ -36,7 +41,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         landcover_root_dir: str,
         batch_size: int = 64,
         num_workers: int = 0,
-        patch_size: int = 256,
+        patch_size: int = 0.04,
         **kwargs: Any,
     ) -> None:
         """Initialize a LightningDataModule for MODIS and Landcover based DataLoaders.
@@ -44,15 +49,19 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         Args:
             modis_root_dir: directory containing MODIS data
             landcover_root_dir: directory containing (Polesia) landcover data
+            batch_size: number of samples in batch
+            num_workers:
+            patch_size:
+
         """
         super().__init__()  # type: ignore[no-untyped-call]
         self.modis_root_dir = modis_root_dir
         self.landcover_root_dir = landcover_root_dir
-        
+
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.patch_size = patch_size
-        
+
         # these two are here just in dev phases
         # self.transform_modis = transform_modis
         # self.transform_lc = transform_lc

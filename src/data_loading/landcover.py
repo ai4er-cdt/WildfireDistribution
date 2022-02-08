@@ -8,7 +8,7 @@ from rasterio.crs import CRS
 class LandcoverSimple(RasterDataset):
     filename_glob = "*Simple.tif"
     is_image = False
-    
+
     # Possible landcover classifications and corresponding values
     classifications = {
         "deciduous forests": 1,
@@ -19,7 +19,7 @@ class LandcoverSimple(RasterDataset):
         "bogs and mires": 6,
         "clearings and cuttings": 7,
         "water": 8,
-        "urban": 9
+        "urban": 9,
     }
 
     def __init__(
@@ -51,7 +51,7 @@ class LandcoverSimple(RasterDataset):
 class LandcoverComplex(RasterDataset):
     filename_glob = "*Complex.tif"
     is_image = False
-    
+
     # Possible landcover classifications and corresponding values
     classifications = {
         "pine, birch, wide leafed coniferous forests": 1,
@@ -66,7 +66,7 @@ class LandcoverComplex(RasterDataset):
         "fen and transitional mire": 10,
         "forest cuttings and clearings, cleared ground outside of urban areas": 11,
         "water": 12,
-        "urban, cleared ground in urban areas, buildings, and tarmac": 13
+        "urban, cleared ground in urban areas, buildings, and tarmac": 13,
     }
 
     def __init__(
