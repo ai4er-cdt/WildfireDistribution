@@ -40,7 +40,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         modis_root_dir: str,
         landcover_root_dir: str,
         batch_size: int = 64,
-        num_workers: int = 0,
+        num_workers: int = 8,
         patch_size: int = 0.04,
         **kwargs: Any,
     ) -> None:
@@ -62,10 +62,6 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         self.num_workers = num_workers
         self.patch_size = patch_size
 
-        # these two are here just in dev phases
-        # self.transform_modis = transform_modis
-        # self.transform_lc = transform_lc
-
     def modis_transforms(self, sample: Dict[str, Any]) -> Dict[str, Any]:
         # Binarize the samples
         sample["mask"] = torch.where(
@@ -78,7 +74,10 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             torch.zeros(sample["mask"].shape, dtype=torch.int32),
             sample["mask"],
         )
-        return sample
+
+        sample_ = {"mask": sample["mask"].long().squeeze()}
+
+        return sample_
 
     def landcover_transforms(
         self,
@@ -103,7 +102,9 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         # outputs = sample
         sample["image"] = new_mask.to(torch.int32)
 
-        return sample
+        sample_ = {"image": sample["image"].float()}
+
+        return sample_
 
     def setup(self, stage: Optional[str] = None) -> None:
         """Initialize the main ``Dataset`` objects.
@@ -129,23 +130,13 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
 
         self.dataset = landcover & modis
 
-        # TODO: figure out better train/val/test split
         roi = self.dataset.bounds
-        midx = roi.minx + (roi.maxx - roi.minx) / 2
-        midy = roi.miny + (roi.maxy - roi.miny) / 2
-        train_roi = BoundingBox(roi.minx, midx, roi.miny, roi.maxy, roi.mint, roi.maxt)
-        val_roi = BoundingBox(midx, roi.maxx, roi.miny, midy, roi.mint, roi.maxt)
-        test_roi = BoundingBox(roi.minx, roi.maxx, midy, roi.maxy, roi.mint, roi.maxt)
 
         self.train_sampler = RandomBatchGeoSampler(
-            landcover, self.patch_size, self.batch_size, self.length, train_roi
+            landcover, self.patch_size, self.batch_size, self.length, roi
         )
-        self.val_sampler = GridGeoSampler(
-            landcover, self.patch_size, self.stride, val_roi
-        )
-        self.test_sampler = GridGeoSampler(
-            landcover, self.patch_size, self.stride, test_roi
-        )
+        self.val_sampler = GridGeoSampler(landcover, self.patch_size, self.stride, roi)
+        self.test_sampler = GridGeoSampler(landcover, self.patch_size, self.stride, roi)
 
     def train_dataloader(self) -> DataLoader[Any]:
         """Return a DataLoader for training.
