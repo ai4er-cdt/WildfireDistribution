@@ -1,3 +1,4 @@
+from ..data_loading import MODIS_JD
 import numpy as np
 import random
 import math
@@ -34,13 +35,17 @@ class ConstrainedRandomGeoSampler(RandomGeoSampler):
     # Define the constructor
     def __init__(
         self,
-        dataset: GeoDataset,
+        dataset: MODIS_JD,
         size: Union[Tuple[float, float], float],
         length: int,
         not_burned_prop: float,
         burn_th: float,
         roi: Optional[BoundingBox] = None,
     ) -> None:
+        
+        # Ensures that the input dataset is of type: Modis_JD
+        if not isinstance(dataset, MODIS_JD):
+            raise TypeError("Input dataset to sampler must be of type: MODIS_JD.")
 
         # Use init from RandomGeoSampler parent class
         super().__init__(dataset, size, length)
@@ -133,7 +138,7 @@ class ConstrainedRandomBatchGeoSampler(RandomBatchGeoSampler):
     # Define the constructor
     def __init__(
         self,
-        dataset: GeoDataset,
+        dataset: MODIS_JD,
         size: Union[Tuple[float, float], float],
         batch_size: int,
         length: int,
@@ -141,6 +146,10 @@ class ConstrainedRandomBatchGeoSampler(RandomBatchGeoSampler):
         burn_th: float,
         roi: Optional[BoundingBox] = None,
     ) -> None:
+        
+        # Ensures that the input dataset is of type: Modis_JD
+        if not isinstance(dataset, MODIS_JD):
+            raise TypeError("Input dataset to sampler must be of type: MODIS_JD.")
 
         # Use init from RandomBatchGeoSampler parent class
         super().__init__(dataset, size, batch_size, length)
