@@ -48,7 +48,7 @@ class ConstrainedRandomGeoSampler(RandomGeoSampler):
             raise TypeError("Input dataset to sampler must be of type: MODIS_JD.")
 
         # Use init from RandomGeoSampler parent class
-        super().__init__(dataset, size, length)
+        super().__init__(dataset, size, length, roi=roi)
 
         # Save the input constraints and dataset to the object
         self.dataset = dataset
@@ -150,7 +150,7 @@ class ConstrainedRandomBatchGeoSampler(RandomBatchGeoSampler):
             raise TypeError("Input dataset to sampler must be of type: MODIS_JD.")
 
         # Use init from RandomBatchGeoSampler parent class
-        super().__init__(dataset, size, batch_size, length)
+        super().__init__(dataset, size, batch_size, length, roi=roi)
 
         # Save the input constraints and dataset to the object
         self.dataset = dataset
