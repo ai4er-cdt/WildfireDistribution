@@ -11,6 +11,7 @@ __all__ = (
     "ERA5SWVL1" "ERA5T2M",
     "LandcoverComplex",
     "LandcoverSimple",
+    "MODIS_CCI",
     "MODIS_JD",
     "unzip_all_modis_fire_files",
 )
