@@ -1,5 +1,5 @@
 from .era5land import ERA5SnowC, ERA5SnowDepth, ERA5T2M, ERA5SWVL1
-from .modis_cci import MODIS_JD
+from .modis_cci import MODSI_CCI, MODIS_JD
 
 # this is a bit of a clunky solution for now (for modis unzip)
 from .modis_unzip import unzip_all_modis_fire_files
