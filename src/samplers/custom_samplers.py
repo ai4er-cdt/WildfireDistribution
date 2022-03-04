@@ -58,7 +58,7 @@ class ConstrainedRandomBatchGeoSampler(RandomBatchGeoSampler):
 
     def __iter__(self) -> Iterator[List[BoundingBox]]:
         """Defines a generator function to produce batches of areas to sample next.
-
+        
         Returns:
             List((minx, maxx, miny, maxy, mint, maxt)) coordinates to index a dataset
         """
@@ -88,21 +88,21 @@ class ConstrainedRandomBatchGeoSampler(RandomBatchGeoSampler):
                     self.burn_samples_required -= 1
                     batch.append(bounding_box)
 
-                # If we have found no "burn" samples so far, assume we need to change tile (speed)
-                elif self.burn_samples_required == math.ceil(burn_prop * self.batch_size):
+                # If we have found no "burn" samples so far, assume we need to change tile (speed)
+                elif self.burn_samples_required == math.ceil(self.burn_prop * self.batch_size):
                     hit = random.choice(self.hits)
                     bounds = BoundingBox(*hit.bounds)
             
-            # Return the batch of balanced samples we have gathered
+            # Return the batch of balanced samples we have gathered
             yield batch
 
             # Reset requirements for next batch generation
-            self.burn_samples_required = math.ceil(burn_prop * self.batch_size)
+            self.burn_samples_required = math.ceil(self.burn_prop * self.batch_size)
             self.not_burned_samples_required = self.batch_size - self.burn_samples_required
 
     def get_burn_proportion(self, bounding_box):
         """Returns the burn proportion found within a given bounding box.
-
+        
         Returns:
             burn_prop: the burn proportion present within the bounding box.
         """
