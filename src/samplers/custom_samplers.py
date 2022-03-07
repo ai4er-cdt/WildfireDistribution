@@ -40,10 +40,12 @@ class ConstrainedRandomBatchGeoSampler(RandomBatchGeoSampler):
         roi: Optional[BoundingBox] = None,
         units: Units = Units.PIXELS,
     ) -> None:
-        
+
         # Ensures that the input dataset is of type: IntersectionDataset
         if not isinstance(dataset, IntersectionDataset):
-            raise TypeError("Input dataset to sampler must be of type: IntersectionDataset.")
+            raise TypeError(
+                "Input dataset to sampler must be of type: IntersectionDataset."
+            )
 
         # Use init from RandomBatchGeoSampler parent class
         super().__init__(dataset, size, batch_size, length, roi, units)
@@ -58,7 +60,7 @@ class ConstrainedRandomBatchGeoSampler(RandomBatchGeoSampler):
 
     def __iter__(self) -> Iterator[List[BoundingBox]]:
         """Defines a generator function to produce batches of areas to sample next.
-        
+
         Returns:
             List((minx, maxx, miny, maxy, mint, maxt)) coordinates to index a dataset
         """
@@ -72,12 +74,14 @@ class ConstrainedRandomBatchGeoSampler(RandomBatchGeoSampler):
 
             # Fill a new batch of samples
             batch = []
-            while self.not_burned_samples_required != 0 or self.burn_samples_required != 0:
-            
+            while (
+                self.not_burned_samples_required != 0 or self.burn_samples_required != 0
+            ):
+
                 # Choose a random sample within that tile
                 bounding_box = get_random_bounding_box(bounds, self.size, self.res)
                 samp_burn_prop = self.get_burn_proportion(bounding_box)
-                
+
                 # If we have a "not-burned" sample and we require "not-burned" samples
                 if samp_burn_prop == 0 and self.not_burned_samples_required != 0:
                     self.not_burned_samples_required -= 1
@@ -89,20 +93,24 @@ class ConstrainedRandomBatchGeoSampler(RandomBatchGeoSampler):
                     batch.append(bounding_box)
 
                 # If we have found no "burn" samples so far, assume we need to change tile (speed)
-                elif self.burn_samples_required == math.ceil(self.burn_prop * self.batch_size):
+                elif self.burn_samples_required == math.ceil(
+                    self.burn_prop * self.batch_size
+                ):
                     hit = random.choice(self.hits)
                     bounds = BoundingBox(*hit.bounds)
-            
+
             # Return the batch of balanced samples we have gathered
             yield batch
 
             # Reset requirements for next batch generation
             self.burn_samples_required = math.ceil(self.burn_prop * self.batch_size)
-            self.not_burned_samples_required = self.batch_size - self.burn_samples_required
+            self.not_burned_samples_required = (
+                self.batch_size - self.burn_samples_required
+            )
 
     def get_burn_proportion(self, bounding_box):
         """Returns the burn proportion found within a given bounding box.
-        
+
         Returns:
             burn_prop: the burn proportion present within the bounding box.
         """

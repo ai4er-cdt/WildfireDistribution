@@ -42,7 +42,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         landcover_root_dir: str,
         batch_size: int = 64,
         num_workers: int = 0,
-        patch_size: int = 256, # dav version 
+        patch_size: int = 256,  # dav version
         # patch_size: int = 0.0459937425469195,  # stable version
         one_hot_encode: bool = False,
         balance_samples: bool = False,  # whether or not to constrain the sampler
@@ -78,13 +78,13 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         # Binarize the samples
         sample["mask"] = torch.where(
             sample["mask"] > 0,
-            torch.ones(sample["mask"].shape, dtype=torch.int16), # torchgeo dev req
+            torch.ones(sample["mask"].shape, dtype=torch.int16),  # torchgeo dev req
             # torch.ones(sample["mask"].shape, dtype=torch.int32),
             sample["mask"],
         )
         sample["mask"] = torch.where(
             sample["mask"] < 0,
-            torch.zeros(sample["mask"].shape, dtype=torch.int16), # torchgeo dev req
+            torch.zeros(sample["mask"].shape, dtype=torch.int16),  # torchgeo dev req
             # torch.zeros(sample["mask"].shape, dtype=torch.int32),
             sample["mask"],
         )
@@ -156,7 +156,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
                 length=self.length,
                 burn_prop=self.burn_prop,
                 roi=roi,
-                units = self.units,  
+                units=self.units,
             )
 
         else:
