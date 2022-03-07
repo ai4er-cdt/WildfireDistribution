@@ -1,6 +1,7 @@
-from ..data_loading import MODIS_JD, LandcoverSimple
-
 from typing import Any, Dict, Optional
+
+from ..data_loading import LandcoverSimple, MODIS_JD
+from ..samplers import ConstrainedRandomBatchGeoSampler
 
 import torch
 import pytorch_lightning as pl
@@ -9,7 +10,7 @@ from torch.utils.data import DataLoader
 from torchgeo.samplers.batch import RandomBatchGeoSampler
 from torchgeo.samplers.single import GridGeoSampler
 from torchgeo.datasets import stack_samples
-from torchgeo.datasets import BoundingBox
+from torchgeo.samplers.constants import Units
 
 
 class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
@@ -19,8 +20,8 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
     # patch_size - stride should approx equal
     # the receptive field of a CNN
 
-    length = 100
-    stride = 0.01
+    length = 256
+    stride = 5
 
     simple_classes = {
         "invalid": 0,
@@ -40,8 +41,13 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         modis_root_dir: str,
         landcover_root_dir: str,
         batch_size: int = 64,
-        num_workers: int = 8,
-        patch_size: int = 0.04,
+        num_workers: int = 0,
+        patch_size: int = 256, # dav version 
+        # patch_size: int = 0.0459937425469195,  # stable version
+        one_hot_encode: bool = False,
+        balance_samples: bool = False,  # whether or not to constrain the sampler
+        burn_prop: float = 0.5,
+        units: Units = Units.PIXELS,
         **kwargs: Any,
     ) -> None:
         """Initialize a LightningDataModule for MODIS and Landcover based DataLoaders.
@@ -52,6 +58,8 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             batch_size: number of samples in batch
             num_workers:
             patch_size:
+            one_hot_encode: set True to one hot encode landcover classes
+            balance_samples: set True to get more samples with fires in training
 
         """
         super().__init__()  # type: ignore[no-untyped-call]
@@ -61,17 +69,23 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.patch_size = patch_size
+        self.one_hot_encode = one_hot_encode
+        self.balance_samples = balance_samples
+        self.burn_prop = burn_prop
+        self.units = units
 
     def modis_transforms(self, sample: Dict[str, Any]) -> Dict[str, Any]:
         # Binarize the samples
         sample["mask"] = torch.where(
             sample["mask"] > 0,
-            torch.ones(sample["mask"].shape, dtype=torch.int32),
+            torch.ones(sample["mask"].shape, dtype=torch.int16), # torchgeo dev req
+            # torch.ones(sample["mask"].shape, dtype=torch.int32),
             sample["mask"],
         )
         sample["mask"] = torch.where(
             sample["mask"] < 0,
-            torch.zeros(sample["mask"].shape, dtype=torch.int32),
+            torch.zeros(sample["mask"].shape, dtype=torch.int16), # torchgeo dev req
+            # torch.zeros(sample["mask"].shape, dtype=torch.int32),
             sample["mask"],
         )
 
@@ -84,23 +98,25 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         sample: Dict[str, Any],
     ) -> Dict[str, Any]:
 
-        x_shape = sample["image"].shape
+        if self.one_hot_encode:
 
-        input_mask = sample["image"]
-        # Get the one-hot encodings, which are a tensor of: (batch_idx, lat, lon, band_idx)
-        encodings = F.one_hot(
-            input_mask.to(torch.int64), num_classes=len(self.simple_classes)
-        )
+            x_shape = sample["image"].shape
 
-        # not sure this is the right shape we want for the mask – here the batch idx is missing
-        # but maybe that gets added in the dataloader
-        new_mask = torch.zeros([len(self.simple_classes), x_shape[1], x_shape[2]])
-        for band_idx in range(0, len(self.simple_classes)):
-            new_mask[band_idx, :, :] = encodings[0, :, :, band_idx]
+            input_mask = sample["image"]
+            # Get the one-hot encodings, which are a tensor of: (batch_idx, lat, lon, band_idx)
+            encodings = F.one_hot(
+                input_mask.to(torch.int64), num_classes=len(self.simple_classes)
+            )
 
-        # Write one-hot encodings to the output tensor
-        # outputs = sample
-        sample["image"] = new_mask.to(torch.int32)
+            # not sure this is the right shape we want for the mask – here the batch idx is missing
+            # but maybe that gets added in the dataloader
+            new_mask = torch.zeros([len(self.simple_classes), x_shape[1], x_shape[2]])
+            for band_idx in range(0, len(self.simple_classes)):
+                new_mask[band_idx, :, :] = encodings[0, :, :, band_idx]
+
+            # Write one-hot encodings to the output tensor
+            # outputs = sample
+            sample["image"] = new_mask.to(torch.int32)
 
         sample_ = {"image": sample["image"].float()}
 
@@ -129,14 +145,31 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         )
 
         self.dataset = landcover & modis
-
         roi = self.dataset.bounds
 
-        self.train_sampler = RandomBatchGeoSampler(
-            landcover, self.patch_size, self.batch_size, self.length, roi
+        if self.balance_samples:
+            print("Using a constrained sampler to get more samples with fires.")
+            self.train_sampler = ConstrainedRandomBatchGeoSampler(
+                dataset=self.dataset,
+                size=self.patch_size,
+                batch_size=self.batch_size,
+                length=self.length,
+                burn_prop=self.burn_prop,
+                roi=roi,
+                units = self.units,  
+            )
+
+        else:
+            self.train_sampler = RandomBatchGeoSampler(
+                self.dataset, self.patch_size, self.batch_size, self.length, roi
+            )
+
+        self.val_sampler = GridGeoSampler(
+            self.dataset, self.patch_size, self.stride, roi
         )
-        self.val_sampler = GridGeoSampler(landcover, self.patch_size, self.stride, roi)
-        self.test_sampler = GridGeoSampler(landcover, self.patch_size, self.stride, roi)
+        self.test_sampler = GridGeoSampler(
+            self.dataset, self.patch_size, self.stride, roi
+        )
 
     def train_dataloader(self) -> DataLoader[Any]:
         """Return a DataLoader for training.
@@ -163,6 +196,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             sampler=self.val_sampler,
             num_workers=self.num_workers,
             collate_fn=stack_samples,
+            shuffle=False,
         )
 
     def test_dataloader(self) -> DataLoader[Any]:
@@ -177,4 +211,5 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             sampler=self.test_sampler,
             num_workers=self.num_workers,
             collate_fn=stack_samples,
+            shuffle=False,
         )
