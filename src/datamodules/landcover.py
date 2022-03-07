@@ -20,7 +20,6 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
     # patch_size - stride should approx equal
     # the receptive field of a CNN
 
-    length = 256
     stride = 5
 
     simple_classes = {
@@ -41,6 +40,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         modis_root_dir: str,
         landcover_root_dir: str,
         batch_size: int = 64,
+        length: int = 256,
         num_workers: int = 0,
         patch_size: int = 256,  # dav version
         # patch_size: int = 0.0459937425469195,  # stable version
@@ -67,6 +67,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         self.landcover_root_dir = landcover_root_dir
 
         self.batch_size = batch_size
+        self.length = length
         self.num_workers = num_workers
         self.patch_size = patch_size
         self.one_hot_encode = one_hot_encode
