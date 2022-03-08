@@ -15,4 +15,5 @@ __all__ = (
     "MODIS_CCI",
     "MODIS_JD",
     "unzip_all_modis_fire_files",
+    "Landsat7",
 )
