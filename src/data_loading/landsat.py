@@ -9,15 +9,13 @@ from typing import Any, Callable, Dict, List, Optional, Sequence
 from rasterio.crs import CRS
 
 
-
-
 class Landsat(RasterDataset, abc.ABC):
     """Abstract base class for all Landsat datasets.
     `Landsat <https://landsat.gsfc.nasa.gov/>`_ is a joint NASA/USGS program,
     providing the longest continuous space-based record of Earth's land in existence.
     If you use this dataset in your research, please cite it using the following format:
     * https://www.usgs.gov/centers/eros/data-citation
-    
+
     For GTC, we will use the Landsat7 class with bands = ["B2", "B3", "B4", "B5"]
     """
 

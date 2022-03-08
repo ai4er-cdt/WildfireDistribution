@@ -129,15 +129,9 @@ class MODISJDLandcoverSimpleLandsatDataModule(pl.LightningDataModule):
             landcover.crs,
             landcover.res,
             transforms=self.modis_transforms,
-            
         )
-        
-        landsat = Landsat7(
-            self.landsat_root_dir,
-            landcover.crs,
-            landcover.res
-        )
-                           
+
+        landsat = Landsat7(self.landsat_root_dir, landcover.crs, landcover.res)
 
         self.dataset = landcover & modis & landsat
 
