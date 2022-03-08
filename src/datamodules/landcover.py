@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from ..data_loading import LandcoverSimple, MODIS_JD
+from ..data_loading import LandcoverSimple, MODIS_JD, Sentinel2
 from ..samplers import ConstrainedRandomBatchGeoSampler
 
 import torch
@@ -40,6 +40,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         self,
         modis_root_dir: str,
         landcover_root_dir: str,
+        sentinel_root_dir: Optional[str] = None,
         batch_size: int = 64,
         num_workers: int = 0,
         patch_size: int = 256,  # dav version
@@ -65,6 +66,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         super().__init__()  # type: ignore[no-untyped-call]
         self.modis_root_dir = modis_root_dir
         self.landcover_root_dir = landcover_root_dir
+        self.sentinel_root_dir = sentinel_root_dir
 
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -145,6 +147,16 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         )
 
         self.dataset = landcover & modis
+
+        if self.sentinel_root_dir is not None:
+            sentinel = Sentinel2(
+                self.sentinel_root_dir,
+                landcover.crs,
+                landcover.res,
+                bands=["B03", "B04", "B08"],
+            )
+            self.dataset = self.dataset & sentinel
+
         roi = self.dataset.bounds
 
         if self.balance_samples:
