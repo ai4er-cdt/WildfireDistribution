@@ -1,7 +1,6 @@
-from typing import Any, Dict, Optional
+from ..data_loading import MODIS_JD, LandcoverSimple, Landsat7
 
-from ..data_loading import LandcoverSimple, MODIS_JD, Sentinel2
-from ..samplers import ConstrainedRandomBatchGeoSampler
+from typing import Any, Dict, Optional
 
 import torch
 import pytorch_lightning as pl
@@ -10,17 +9,18 @@ from torch.utils.data import DataLoader
 from torchgeo.samplers.batch import RandomBatchGeoSampler
 from torchgeo.samplers.single import GridGeoSampler
 from torchgeo.datasets import stack_samples
-from torchgeo.samplers.constants import Units
+from torchgeo.datasets import BoundingBox
 
 
-class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
+class MODISJDLandcoverSimpleLandsatDataModule(pl.LightningDataModule):
 
     # TODO: tune these hyperparams
     # stride is not trivial to choose
     # patch_size - stride should approx equal
     # the receptive field of a CNN
 
-    stride = 5
+    length = 100
+    stride = 0.01
 
     simple_classes = {
         "invalid": 0,
@@ -39,56 +39,42 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         self,
         modis_root_dir: str,
         landcover_root_dir: str,
-        sentinel_root_dir: Optional[str] = None,
+        landsat_root_dir: str,
         batch_size: int = 64,
-        length: int = 256,
-        num_workers: int = 0,
-        patch_size: int = 256,  # dav version
-        # patch_size: int = 0.0459937425469195,  # stable version
-        one_hot_encode: bool = False,
-        balance_samples: bool = False,  # whether or not to constrain the sampler
-        burn_prop: float = 0.5,
-        units: Units = Units.PIXELS,
+        num_workers: int = 8,
+        patch_size: int = 0.04,
         **kwargs: Any,
     ) -> None:
-        """Initialize a LightningDataModule for MODIS and Landcover based DataLoaders.
+        """Initialize a LightningDataModule for MODIS, LANDSAT and Landcover based DataLoaders.
 
         Args:
             modis_root_dir: directory containing MODIS data
+            landsat_root_dir: directory containing Landsat data
             landcover_root_dir: directory containing (Polesia) landcover data
             batch_size: number of samples in batch
             num_workers:
             patch_size:
-            one_hot_encode: set True to one hot encode landcover classes
-            balance_samples: set True to get more samples with fires in training
 
         """
         super().__init__()  # type: ignore[no-untyped-call]
         self.modis_root_dir = modis_root_dir
         self.landcover_root_dir = landcover_root_dir
-        self.sentinel_root_dir = sentinel_root_dir
+        self.landsat_root_dir = landsat_root_dir
 
         self.batch_size = batch_size
-        self.length = length
         self.num_workers = num_workers
         self.patch_size = patch_size
-        self.one_hot_encode = one_hot_encode
-        self.balance_samples = balance_samples
-        self.burn_prop = burn_prop
-        self.units = units
 
     def modis_transforms(self, sample: Dict[str, Any]) -> Dict[str, Any]:
         # Binarize the samples
         sample["mask"] = torch.where(
             sample["mask"] > 0,
-            torch.ones(sample["mask"].shape, dtype=torch.int16),  # torchgeo dev req
-            # torch.ones(sample["mask"].shape, dtype=torch.int32),
+            torch.ones(sample["mask"].shape, dtype=torch.int32),
             sample["mask"],
         )
         sample["mask"] = torch.where(
             sample["mask"] < 0,
-            torch.zeros(sample["mask"].shape, dtype=torch.int16),  # torchgeo dev req
-            # torch.zeros(sample["mask"].shape, dtype=torch.int32),
+            torch.zeros(sample["mask"].shape, dtype=torch.int32),
             sample["mask"],
         )
 
@@ -101,25 +87,23 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         sample: Dict[str, Any],
     ) -> Dict[str, Any]:
 
-        if self.one_hot_encode:
+        x_shape = sample["image"].shape
 
-            x_shape = sample["image"].shape
+        input_mask = sample["image"]
+        # Get the one-hot encodings, which are a tensor of: (batch_idx, lat, lon, band_idx)
+        encodings = F.one_hot(
+            input_mask.to(torch.int64), num_classes=len(self.simple_classes)
+        )
 
-            input_mask = sample["image"]
-            # Get the one-hot encodings, which are a tensor of: (batch_idx, lat, lon, band_idx)
-            encodings = F.one_hot(
-                input_mask.to(torch.int64), num_classes=len(self.simple_classes)
-            )
+        # not sure this is the right shape we want for the mask – here the batch idx is missing
+        # but maybe that gets added in the dataloader
+        new_mask = torch.zeros([len(self.simple_classes), x_shape[1], x_shape[2]])
+        for band_idx in range(0, len(self.simple_classes)):
+            new_mask[band_idx, :, :] = encodings[0, :, :, band_idx]
 
-            # not sure this is the right shape we want for the mask – here the batch idx is missing
-            # but maybe that gets added in the dataloader
-            new_mask = torch.zeros([len(self.simple_classes), x_shape[1], x_shape[2]])
-            for band_idx in range(0, len(self.simple_classes)):
-                new_mask[band_idx, :, :] = encodings[0, :, :, band_idx]
-
-            # Write one-hot encodings to the output tensor
-            # outputs = sample
-            sample["image"] = new_mask.to(torch.int32)
+        # Write one-hot encodings to the output tensor
+        # outputs = sample
+        sample["image"] = new_mask.to(torch.int32)
 
         sample_ = {"image": sample["image"].float()}
 
@@ -145,44 +129,25 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             landcover.crs,
             landcover.res,
             transforms=self.modis_transforms,
+            
         )
+        
+        landsat = Landsat7(
+            self.landsat_root_dir,
+            landcover.crs,
+            landcover.res
+        )
+                           
 
-        self.dataset = landcover & modis
-
-        if self.sentinel_root_dir is not None:
-            sentinel = Sentinel2(
-                self.sentinel_root_dir,
-                landcover.crs,
-                landcover.res,
-                bands=["B03", "B04", "B08"],
-            )
-            self.dataset = self.dataset & sentinel
+        self.dataset = landcover & modis & landsat
 
         roi = self.dataset.bounds
 
-        if self.balance_samples:
-            print("Using a constrained sampler to get more samples with fires.")
-            self.train_sampler = ConstrainedRandomBatchGeoSampler(
-                dataset=self.dataset,
-                size=self.patch_size,
-                batch_size=self.batch_size,
-                length=self.length,
-                burn_prop=self.burn_prop,
-                roi=roi,
-                units=self.units,
-            )
-
-        else:
-            self.train_sampler = RandomBatchGeoSampler(
-                self.dataset, self.patch_size, self.batch_size, self.length, roi
-            )
-
-        self.val_sampler = GridGeoSampler(
-            self.dataset, self.patch_size, self.stride, roi
+        self.train_sampler = RandomBatchGeoSampler(
+            landcover, self.patch_size, self.batch_size, self.length, roi
         )
-        self.test_sampler = GridGeoSampler(
-            self.dataset, self.patch_size, self.stride, roi
-        )
+        self.val_sampler = GridGeoSampler(landcover, self.patch_size, self.stride, roi)
+        self.test_sampler = GridGeoSampler(landcover, self.patch_size, self.stride, roi)
 
     def train_dataloader(self) -> DataLoader[Any]:
         """Return a DataLoader for training.
@@ -209,7 +174,6 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             sampler=self.val_sampler,
             num_workers=self.num_workers,
             collate_fn=stack_samples,
-            shuffle=False,
         )
 
     def test_dataloader(self) -> DataLoader[Any]:
@@ -224,5 +188,4 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             sampler=self.test_sampler,
             num_workers=self.num_workers,
             collate_fn=stack_samples,
-            shuffle=False,
         )
