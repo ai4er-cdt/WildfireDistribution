@@ -1,5 +1,5 @@
 from .custom_samplers import ConstrainedRandomBatchGeoSampler
-from .constants import units
+from .constants import Units
 
 __all__ = (
 "ConstrainedRandomBatchGeoSampler",
