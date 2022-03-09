@@ -232,13 +232,20 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         Returns:
             validation data loader
         """
+        #return DataLoader(
+            #self.dataset,
+            #batch_size=self.batch_size,
+            #sampler=self.val_sampler,
+            #num_workers=self.num_workers,
+            #collate_fn=stack_samples,
+            #shuffle=False,
+        #)
+    
         return DataLoader(
             self.dataset,
-            batch_size=self.batch_size,
-            sampler=self.val_sampler,
+            batch_sampler=self.val_sampler,
             num_workers=self.num_workers,
             collate_fn=stack_samples,
-            shuffle=False,
         )
 
     def test_dataloader(self) -> DataLoader[Any]:
@@ -247,11 +254,18 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         Returns:
             testing data loader
         """
+        #return DataLoader(
+            #self.dataset,
+            #batch_size=self.batch_size,
+            #sampler=self.test_sampler,
+            #num_workers=self.num_workers,
+            #collate_fn=stack_samples,
+            #shuffle=False,
+        #)
+        
         return DataLoader(
             self.dataset,
-            batch_size=self.batch_size,
-            sampler=self.test_sampler,
+            batch_sampler=self.test_sampler,
             num_workers=self.num_workers,
             collate_fn=stack_samples,
-            shuffle=False,
         )
