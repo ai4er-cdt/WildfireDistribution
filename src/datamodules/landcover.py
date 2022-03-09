@@ -200,11 +200,17 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
                 self.dataset, self.patch_size, self.batch_size, self.length, roi
             )
 
-        self.val_sampler = GridGeoSampler(
-            self.dataset, self.patch_size, self.stride, roi
+        #self.val_sampler = GridGeoSampler(
+            #self.dataset, self.patch_size, self.stride, roi
+        #)
+        self.val_sampler = RandomBatchGeoSampler(
+            self.dataset, self.patch_size, self.batch_size, self.length, roi
         )
-        self.test_sampler = GridGeoSampler(
-            self.dataset, self.patch_size, self.stride, roi
+        #self.test_sampler = GridGeoSampler(
+            #self.dataset, self.patch_size, self.stride, roi
+        #)
+        self.test_sampler = RandomBatchGeoSampler(
+            self.dataset, self.patch_size, self.batch_size, self.length, roi
         )
 
     def train_dataloader(self) -> DataLoader[Any]:
