@@ -10,7 +10,8 @@ from torch.utils.data import DataLoader
 from torchgeo.samplers.batch import RandomBatchGeoSampler
 from torchgeo.samplers.single import GridGeoSampler
 from torchgeo.datasets import stack_samples
-from torchgeo.samplers.constants import Units
+# from torchgeo.samplers.constants import Units
+from ..samplers import Units
 
 
 class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
@@ -58,7 +59,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             modis_root_dir: directory containing MODIS data
             landcover_root_dir: directory containing (Polesia) landcover data
             sentinel_root_dir: directory of sentinel 2 band data
-            landast_root_dir: directory of landsat 7 data 
+            landast_root_dir: directory of landsat 7 data
             batch_size: number of samples in batch
             num_workers:
             patch_size:
@@ -127,16 +128,16 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         sample_ = {"image": sample["image"].float()}
 
         return sample_
-    
+
     def get_sample(
         self,
         sample: Dict[str, Any],
     ) -> Dict[str, Any]:
-        
+
         sample_ = {"image": sample["image"].float()}
 
         return sample_
-    
+
     def setup(self, stage: Optional[str] = None) -> None:
         """Initialize the main ``Dataset`` objects.
 
@@ -170,7 +171,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
                 transforms = self.get_sample,
             )
             self.dataset = self.dataset & sentinel
-        
+
         if self.landsat_root_dir is not None:
             landsat = Landsat7(
                 self.landsat_root_dir,
@@ -240,7 +241,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             #collate_fn=stack_samples,
             #shuffle=False,
         #)
-    
+
         return DataLoader(
             self.dataset,
             batch_sampler=self.val_sampler,
@@ -262,7 +263,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             #collate_fn=stack_samples,
             #shuffle=False,
         #)
-        
+
         return DataLoader(
             self.dataset,
             batch_sampler=self.test_sampler,
