@@ -127,7 +127,16 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         sample_ = {"image": sample["image"].float()}
 
         return sample_
+    
+    def get_sample(
+        self,
+        sample: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        
+        sample_ = {"image": sample["image"].float()}
 
+        return sample_
+    
     def setup(self, stage: Optional[str] = None) -> None:
         """Initialize the main ``Dataset`` objects.
 
@@ -158,6 +167,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
                 landcover.crs,
                 landcover.res,
                 bands=["B03", "B04", "B08"],
+                transforms = self.get_sample,
             )
             self.dataset = self.dataset & sentinel
         
@@ -167,6 +177,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
                 landcover.crs,
                 landcover.res,
                 bands=["B2", "B3", "B4", "B5"],
+                transforms = self.get_sample,
             )
             self.dataset = self.dataset & landsat
 
