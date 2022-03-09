@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from ..data_loading import LandcoverSimple, MODIS_JD, Sentinel2
+from ..data_loading import LandcoverSimple, MODIS_JD, Sentinel2, Landsat7
 from ..samplers import ConstrainedRandomBatchGeoSampler
 
 import torch
@@ -40,6 +40,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         modis_root_dir: str,
         landcover_root_dir: str,
         sentinel_root_dir: Optional[str] = None,
+        landsat_root_dir: Optional[str]=None,
         batch_size: int = 64,
         length: int = 256,
         num_workers: int = 0,
@@ -56,6 +57,8 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         Args:
             modis_root_dir: directory containing MODIS data
             landcover_root_dir: directory containing (Polesia) landcover data
+            sentinel_root_dir: directory of sentinel 2 band data
+            landast_root_dir: directory of landsat 7 data 
             batch_size: number of samples in batch
             num_workers:
             patch_size:
@@ -67,7 +70,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         self.modis_root_dir = modis_root_dir
         self.landcover_root_dir = landcover_root_dir
         self.sentinel_root_dir = sentinel_root_dir
-
+        self.landsat_root_dir = landsat_root_dir
         self.batch_size = batch_size
         self.length = length
         self.num_workers = num_workers
@@ -157,6 +160,15 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
                 bands=["B03", "B04", "B08"],
             )
             self.dataset = self.dataset & sentinel
+        
+        if self.landsat_root_dir is not None:
+            landsat = Landsat7(
+                self.landsat_root_dir,
+                landcover.crs,
+                landcover.res,
+                bands=["B2", "B3", "B4", "B5"],
+            )
+            self.dataset = self.dataset & landsat
 
         roi = self.dataset.bounds
 
