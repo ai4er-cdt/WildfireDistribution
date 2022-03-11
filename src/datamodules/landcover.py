@@ -10,8 +10,7 @@ from torch.utils.data import DataLoader
 from torchgeo.samplers.batch import RandomBatchGeoSampler
 from torchgeo.samplers.single import GridGeoSampler
 from torchgeo.datasets import stack_samples
-# from torchgeo.samplers.constants import Units
-from ..samplers import Units
+from torchgeo.samplers.constants import Units
 
 
 class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
