@@ -6,7 +6,7 @@
 - what is this project about? 
 - where to find the data and how to access it
 - who is supporting this project (add their logos maybe)
-- consider adding a note on the license
+- adding a note on the license: CC-BY for reports, readme etc.
 
 ## Requirements
 - Python 3.9+
