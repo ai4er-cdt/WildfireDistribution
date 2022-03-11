@@ -3,10 +3,23 @@
  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 
+- what is this project about? 
+- where to find the data and how to access it
+- who is supporting this project (add their logos maybe)
+- consider adding a note on the license
+
 ## Requirements
 - Python 3.9+
 
-## Getting started
+## Getting started/installation
+
+- how to set up the environment with the config file
+- how to run the train script from the command line
+
+
+## Example usage
+
+- show some plots of results
 
 
 ## Project Organization
