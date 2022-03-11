@@ -5,8 +5,7 @@ from typing import Optional, Iterator, Union, Tuple, List
 from torchgeo.datasets import BoundingBox, IntersectionDataset
 from torchgeo.samplers import RandomBatchGeoSampler
 from torchgeo.samplers.utils import get_random_bounding_box
-# from torchgeo.samplers.constants import Units
-from .constants import Units
+from torchgeo.samplers.constants import Units
 
 
 class ConstrainedRandomBatchGeoSampler(RandomBatchGeoSampler):
