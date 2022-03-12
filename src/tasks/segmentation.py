@@ -52,7 +52,7 @@ class SemanticSegmentationTask(LightningModule):
             )
         elif self.hparams["loss"] == "jaccard":
             self.loss = smp.losses.JaccardLoss(
-                mode="binary", classes=self.hparams["num_classes"]
+                mode="binary", #classes=self.hparams["num_classes"]
             )
         elif self.hparams["loss"] == "focal":
             self.loss = smp.losses.FocalLoss(
