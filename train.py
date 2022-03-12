@@ -1,50 +1,63 @@
 # from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 import os
-
 # from argparse import ArgumentParser
-
 # from pytorch_lightning.callbacks import Callback
 from omegaconf import DictConfig, OmegaConf
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
-from torchgeo.trainers import SemanticSegmentationTask
+# from torchgeo.trainers import SemanticSegmentationTask
 from pytorch_lightning import Trainer
 from src.datamodules import MODISJDLandcoverSimpleDataModule
+from src.tasks import BinarySemanticSegmentationTask
 
+from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import Callback
 
 def main():
 
     datamodule = MODISJDLandcoverSimpleDataModule(
-        modis_root_dir="data/MODIS/*/",
-        landcover_root_dir="data/Classified/",
-        batch_size=1,
-        num_workers=1,
-        # constrained=True,
+        modis_root_dir="data/modis/2017/",
+        landcover_root_dir="data/landcover/",
+        patch_size=256,
+        length=512,
+        batch_size=64,
+        num_workers=0,
+        one_hot_encode=False,
+        balance_samples=True,
+        grid_sampler=False,
+    )
+
+    
+    model = BinarySemanticSegmentationTask(
+     segmentation_model="unet",
+     encoder_name="resnet18",
+     encoder_weights="imagenet",
+     in_channels=1,
+     num_filters=64,
+     num_classes=2, 
+     loss="jaccard",
+     learning_rate=0.1,
+     ignore_zeros=None,
+     learning_rate_schedule_patience=5,
     )
     
-    model = SemanticSegmentationTask(
-        segmentation_model="fcn",
-        in_channels=10,
-        num_classes=2,
-        num_filters=5,
-        loss="ce",
-        ignore_zeros=False,
-        learning_rate=0.1,
-        learning_rate_schedule_patience=5,
+    wandb_logger = WandbLogger(project="Wildfires", log_model="all", name="jaccard_balanced_sampler_w_callbacks")
+    
+    
+    callbacks = [ModelCheckpoint(monitor="train_Accuracy", mode="max"),
+                        ModelCheckpoint(monitor='val_Accuracy', mode='max'),
+                        ModelCheckpoint(monitor="val_loss", mode="max")]
+    
+    
+    trainer = Trainer(
+        gpus=1, min_epochs=1, max_epochs=20,
+        logger=wandb_logger, 
+        log_every_n_steps=2,
+        callbacks=callbacks,
+        # auto_lr_find=True,
     )
     
-    # wandb_logger = WandbLogger(project="Wildfires", log_model="all")
-    
-    # fast dev mode
-    trainer = Trainer(gpus=1, 
-                      fast_dev_run=True,)
-    
-    # trainer = Trainer(
-    #     gpus=1, logger=wandb_logger, min_epochs=1, max_epochs=5,
-    #     auto_lr_find=True,
-    # )
-    
-    # wandb_logger.watch(model)
+    wandb_logger.watch(model)
 
     # load args from the config file
     
@@ -72,7 +85,7 @@ def main():
     
     # if trainer_args.get("auto_lr_find"):
         # trainer.tune(model=model, datamodule=datamodule)
-    
+    # trainer.tune(model=model, datamodule=datamodule)
     trainer.fit(model, datamodule)
 
 
