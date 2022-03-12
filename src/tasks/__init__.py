@@ -1,5 +1,5 @@
-from .segmentation import SemanticSegmentationTask
+from .segmentation import BinarySemanticSegmentationTask
 
 __all__ = (
-    "SemanticSegmentationTask",
+    "BinarySemanticSegmentationTask",
 )

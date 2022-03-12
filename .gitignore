@@ -92,5 +92,5 @@ io/
 .history
 
 # Sandbox and data folders
-.sandbox
-.data
+sandbox/
+data/

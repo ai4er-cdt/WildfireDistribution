@@ -16,7 +16,7 @@ from torchgeo.datasets.utils import unbind_samples
 from torchgeo.models import FCN
 
 
-class SemanticSegmentationTask(LightningModule):
+class BinarySemanticSegmentationTask(LightningModule):
     """LightningModule for semantic segmentation of images."""
 
     def config_task(self) -> None:
@@ -26,19 +26,16 @@ class SemanticSegmentationTask(LightningModule):
                 encoder_name=self.hparams["encoder_name"],
                 encoder_weights=self.hparams["encoder_weights"],
                 in_channels=self.hparams["in_channels"],
-            #     classes=self.hparams["num_classes"],
             )
         elif self.hparams["segmentation_model"] == "deeplabv3+":
             self.model = smp.DeepLabV3Plus(
                 encoder_name=self.hparams["encoder_name"],
                 encoder_weights=self.hparams["encoder_weights"],
                 in_channels=self.hparams["in_channels"],
-                classes=self.hparams["num_classes"],
             )
         elif self.hparams["segmentation_model"] == "fcn":
             self.model = FCN(
                 in_channels=self.hparams["in_channels"],
-                classes=self.hparams["num_classes"],
                 num_filters=self.hparams["num_filters"],
             )
         else:
@@ -46,13 +43,9 @@ class SemanticSegmentationTask(LightningModule):
                 f"Model type '{self.hparams['segmentation_model']}' is not valid."
             )
 
-        if self.hparams["loss"] == "ce":
-            self.loss = nn.CrossEntropyLoss(  # type: ignore[attr-defined]
-                ignore_index=-1000 if self.ignore_zeros is None else 0
-            )
-        elif self.hparams["loss"] == "jaccard":
+        if self.hparams["loss"] == "jaccard":
             self.loss = smp.losses.JaccardLoss(
-                mode="binary", #classes=self.hparams["num_classes"]
+                mode="binary",
             )
         elif self.hparams["loss"] == "focal":
             self.loss = smp.losses.FocalLoss(
@@ -69,7 +62,6 @@ class SemanticSegmentationTask(LightningModule):
             encoder_weights: None or "imagenet" to use imagenet pretrained weights in
                 the encoder model
             in_channels: Number of channels in input image
-            num_classes: Number of semantic classes to predict
             loss: Name of the loss function
             ignore_zeros: Whether to ignore the "0" class value in the loss and metrics
         Raises:
@@ -85,7 +77,6 @@ class SemanticSegmentationTask(LightningModule):
         self.train_metrics = MetricCollection(
             [
                 Accuracy(
-                    num_classes=self.hparams["num_classes"],
                     ignore_index=self.ignore_zeros,
                 ),
                 JaccardIndex(
