@@ -26,8 +26,8 @@ class SemanticSegmentationTask(LightningModule):
                 encoder_name=self.hparams["encoder_name"],
                 encoder_weights=self.hparams["encoder_weights"],
                 in_channels=self.hparams["in_channels"],
-                classes=self.hparams["num_classes"],
-            )
+            #     classes=self.hparams["num_classes"],
+            # )
         elif self.hparams["segmentation_model"] == "deeplabv3+":
             self.model = smp.DeepLabV3Plus(
                 encoder_name=self.hparams["encoder_name"],
