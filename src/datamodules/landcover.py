@@ -38,7 +38,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         modis_root_dir: str,
         landcover_root_dir: str,
         sentinel_root_dir: Optional[str] = None,
-        landsat_root_dir: Optional[str]=None,
+        landsat_root_dir: Optional[str] = None,
         batch_size: int = 64,
         length: int = 256,
         num_workers: int = 0,
@@ -171,7 +171,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
                 landcover.crs,
                 landcover.res,
                 bands=["B03", "B04", "B08"],
-                transforms = self.get_sample,
+                transforms=self.get_sample,
             )
             self.dataset = self.dataset & sentinel
 
@@ -181,7 +181,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
                 landcover.crs,
                 landcover.res,
                 bands=["B2", "B3", "B4", "B5"],
-                transforms = self.get_sample,
+                transforms=self.get_sample,
             )
             self.dataset = self.dataset & landsat
 
@@ -203,7 +203,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             self.train_sampler = RandomBatchGeoSampler(
                 self.dataset, self.patch_size, self.batch_size, self.length, roi
             )
-            
+
         if self.grid_sampler:
             # TODO: we probably want to change the ROI's to some consistent sub-area rather than the whole Polesia region!
             self.val_sampler = GridGeoSampler(
@@ -212,7 +212,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             self.test_sampler = GridGeoSampler(
                 self.dataset, self.patch_size, self.stride, roi
             )
-            
+
         else:
             self.val_sampler = RandomBatchGeoSampler(
                 self.dataset, self.patch_size, self.batch_size, self.length, roi
@@ -249,7 +249,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
                 collate_fn=stack_samples,
                 shuffle=False,
             )
-        
+
         else:
             return DataLoader(
                 self.dataset,
@@ -273,7 +273,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
                 collate_fn=stack_samples,
                 shuffle=False,
             )
-        
+
         else:
             return DataLoader(
                 self.dataset,

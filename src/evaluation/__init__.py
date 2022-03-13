@@ -1,5 +1,3 @@
 from .callbacks import LogPredictionsCallback
 
-__all__ = (
-    "LogPredictionsCallback",
-)
+__all__ = ("LogPredictionsCallback",)
