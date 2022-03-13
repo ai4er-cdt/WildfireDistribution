@@ -42,7 +42,7 @@ class BinarySemanticSegmentationTask(LightningModule):
             raise ValueError(
                 f"Model type '{self.hparams['segmentation_model']}' is not valid."
             )
-
+        
         if self.hparams["loss"] == "jaccard":
             self.loss = smp.losses.JaccardLoss(
                 mode="binary",
