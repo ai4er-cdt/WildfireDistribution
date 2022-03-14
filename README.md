@@ -10,13 +10,11 @@
  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 
 ## 1.0 - Background
+In late 2021, one of Cambridge's EPSRC-funded centre for doctoral training (CDT) program's by the name of 'AI for the study of environmental risks' (AI4ER) launched a group team challenge (GTC) amongst it's cohort of 2021. The cohort was split down the middle into two groups of 4, with one tasked with building a neural net capable of categorising ice and open water in the Antarctic's Bellinhausen Sea (Ice Group), whilst the other looked to create a neural net able to predict wildfire in the eastern European region of Polesia (Fire Group). Both of these projects were begun in December 2021 and due to end by March 2022.
 
-In late 2021, one of Cambridge's EPSRC-funded centre for doctoral training (CDT) program's by the name of 'AI for the study of environmental risks' (AI4ER) launched a group team challenge (GTC)amongst it's cohort of 2021. The cohort was split down the middle into two groups of 4, with one tasked with building a neural net capable of categorising ice and open water in the Antarctic's Bellinhausen Sea, whilst the other looked to create a neural net able to predict wildfire in the eastern European region of Polesia.
-
-Both of these projects were begun in December 2021 and due to end by March 2022
+The European Space Agency's (ESA) Φ-lab Division (of the Future Systems Department of the EO Programmes Directorate within ESA) spawned an initiative by the name of AI for earth observation (AI4EO) in 2019. It was in collaboration with this initiative that Cambridge's AI4ER program created the dual GTC projects- the 'ice group' benefitted from the domain-specific guidance of the British Antarctic Survey (BAS), whilst the 'fire group' was aided by the British Ornithological Trust (BTO).
 
 ## 2.0 - Aim
-
 The aim of this project has been to identify spatial relationships between wildfire distribution and climatic, topographical, pedological drivers of wildfire. This was to be achieved by utilising convolutional neural networks (CNNs) to reduce the dimensionality of various geospatial datasets. The motivation for such an endeavour was to provide a new tool for prediction of wildfire genesis, perhaps facilitating the mitigation of future destructive wildfire events; which are known to cause damage to local ecosystems if too frequent.
 
 To narrow the geospatial bounds of the project, a study area was defined which encompassed the north of Ukraine and the south of Belarus, the rough region being known by the name Polesia.
@@ -88,34 +86,34 @@ from within the project directory.
 ### Contributors
 Project Core Members:
 
-- Campbell, Hamish. *(AI4ER Cohort-2021, University of Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=30px>](https://github.com/Hamish-Cam)[<img align="right" src=report/figures/logos/AI4ER.png width=20px>](https://ai4er-cdt.esc.cam.ac.uk/StaffDirectory/students-all/2021-students)
+- Campbell, Hamish. *(AI4ER Cohort-2021, University of Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=30px>](https://github.com/Hamish-Cam)[<img align="right" src=report/figures/logos/AI4ER.png width=25px>](https://ai4er-cdt.esc.cam.ac.uk/StaffDirectory/students-all/2021-students)
 
-- Colverd, Grace. *(AI4ER Cohort-2021, University of Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=30px>](https://github.com/graceebc9)[<img align="right" src=report/figures/logos/AI4ER.png width=20px>](https://ai4er-cdt.esc.cam.ac.uk/StaffDirectory/students-all/2021-students)
+- Colverd, Grace. *(AI4ER Cohort-2021, University of Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=30px>](https://github.com/graceebc9)[<img align="right" src=report/figures/logos/AI4ER.png width=25px>](https://ai4er-cdt.esc.cam.ac.uk/StaffDirectory/students-all/2021-students)
 
-- Højlund-Dodd, Thomas. *(AI4ER Cohort-2021, University of Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=30px>](https://github.com/ThomasDodd97)[<img align="right" src=report/figures/logos/AI4ER.png width=20px>](https://ai4er-cdt.esc.cam.ac.uk/StaffDirectory/students-all/2021-students)[<img align="right" src=report/figures/logos/ORCID_iD.png width=20px>](https://orcid.org/0000-0001-9690-8627)
+- Højlund-Dodd, Thomas. *(AI4ER Cohort-2021, University of Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=30px>](https://github.com/ThomasDodd97)[<img align="right" src=report/figures/logos/AI4ER.png width=25px>](https://ai4er-cdt.esc.cam.ac.uk/StaffDirectory/students-all/2021-students)[<img align="right" src=report/figures/logos/ORCID_iD.png width=25px>](https://orcid.org/0000-0001-9690-8627)
 
-- Stefanović, Sofija. *(AI4ER Cohort-2021, University of Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=30px>](https://github.com/sofstef)[<img align="right" src=report/figures/logos/AI4ER.png width=20px>](https://ai4er-cdt.esc.cam.ac.uk/StaffDirectory/students-all/2021-students)
+- Stefanović, Sofija. *(AI4ER Cohort-2021, University of Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=30px>](https://github.com/sofstef)[<img align="right" src=report/figures/logos/AI4ER.png width=25px>](https://ai4er-cdt.esc.cam.ac.uk/StaffDirectory/students-all/2021-students)
 
 Technical Support Members:
 
-- Rogers, Martin. *(AI Lab, British Antarctic Survey (BAS), Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=30px>](https://github.com/MartinSJRogers)[<img align="right" src=report/figures/logos/bas.png width=21px>](https://www.bas.ac.uk/profile/user_3491-2/)
+- Rogers, Martin. *(AI Lab, British Antarctic Survey (BAS), Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=30px>](https://github.com/MartinSJRogers)[<img align="right" src=report/figures/logos/bas.png width=25px>](https://www.bas.ac.uk/profile/user_3491-2/)
 
-- Wheeler, James. *(Phi Lab, European Space Agency (ESA))*[<img align="right" src=report/figures/logos/phi_labs.png width=24px>](https://philab.phi.esa.int/our-people/)
+- Wheeler, James. *(Phi Lab, European Space Agency (ESA))*[<img align="right" src=report/figures/logos/phi_labs.png width=25px>](https://philab.phi.esa.int/our-people/)
 
 Domain Support Members:
 
-- Ashton-Butt, Adham. *(British Trust for Ornithology (BTO))*[<img align="right" src=report/figures/logos/bto_logo.png width=26>](https://www.bto.org/about-bto/our-staff/adham-ashton-butt)
+- Ashton-Butt, Adham. *(British Trust for Ornithology (BTO))*[<img align="right" src=report/figures/logos/bto_logo.png width=25>](https://www.bto.org/about-bto/our-staff/adham-ashton-butt)
 
 ### Organisations:
 
 University of Cambridge:
-- AI for the study of Environmental Risks (AI4ER), UKRI Centre for Doctoral Training, Cambridge.[<img align="right" src=report/figures/logos/AI4ER.png width=17px>](https://ai4er-cdt.esc.cam.ac.uk/)
+- AI for the study of Environmental Risks (AI4ER), UKRI Centre for Doctoral Training, Cambridge.[<img align="right" src=report/figures/logos/AI4ER.png width=25px>](https://ai4er-cdt.esc.cam.ac.uk/)
 
 AI4EO Initiative of ESA's Φ-Lab
-- AI for Earth Observation (AI4EO) Initiative, Φ-lab Division of the Future Systems Department of the EO Programmes Directorate, European Space Agency (ESA).[<img align="right" src=report/figures/logos/ESA_logo_simple.png width=24px>](https://www.esa.int/)[<img align="right" src=report/figures/logos/phi_labs.png width=24px>](https://philab.phi.esa.int/)[<img align="right" src=report/figures/logos/ai4eo.png width=70px>](https://ai4eo.eu/)
+- AI for Earth Observation (AI4EO) Initiative, Φ-lab Division of the Future Systems Department of the EO Programmes Directorate, European Space Agency (ESA).[<img align="right" src=report/figures/logos/ESA_logo_simple.png width=25px>](https://www.esa.int/)[<img align="right" src=report/figures/logos/phi_labs.png width=25px>](https://philab.phi.esa.int/)[<img align="right" src=report/figures/logos/ai4eo.png width=70px>](https://ai4eo.eu/)
 
 AI4EO Partner:
-- British Trust for Ornithology (BTO), Norfolk.[<img align="right" src=report/figures/logos/bto_logo.png width=26px>](https://www.bto.org/)
+- British Trust for Ornithology (BTO), Norfolk.[<img align="right" src=report/figures/logos/bto_logo.png width=25px>](https://www.bto.org/)
 
 ## References
 
