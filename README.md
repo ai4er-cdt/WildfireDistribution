@@ -1,12 +1,18 @@
-<!-- <br></br> -->
-[<img align="right" src=report/figures/logos/AI4ER.png width=45px>](https://ai4er-cdt.esc.cam.ac.uk/)
+[<img align="right" src=report/figures/logos/ESA_logo_simple.png width=47px>](https://www.esa.int/)
+[<img align="right" src=report/figures/logos/AI4ER.png width=47px>](https://ai4er-cdt.esc.cam.ac.uk/)
 [<img align="right" src=report/figures/logos/bto_logo.png width=50px>](https://www.bto.org/)
 [<img align="right" src=report/figures/logos/UoC_logo.png width=60px>](https://www.cam.ac.uk/)
 
-# Predicting Wildfires
+# Wildfire Prediction
 
  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+
+## Project Focus
+
+The aim of this project has been to identify spatial relationships between wildfire distribution and climatic, topographical, pedological drivers of wildfire.
+
+
 
 - what is this project about? 
 - where to find the data and how to access it
