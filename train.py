@@ -21,7 +21,6 @@ def main():
         one_hot_encode=False,
         balance_samples=True,
         burn_prop=1.0,
-        grid_sampler=False,
     )
 
     # ignore_zeros=True corresponds to ignoring the background class
