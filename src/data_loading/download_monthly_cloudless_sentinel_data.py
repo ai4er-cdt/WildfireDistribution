@@ -6,8 +6,8 @@ import datetime
 import os
 import numpy as np
 
-#This Script download Sentinel2 data in the form of monthly median composite images, for bands 3 and 8,  which are normalized to within 0-1. Data download from EE can be slow - to imrpove run time you can lower the scale (resolution of output) or run different years concurrently.
-
+#This script download Sentinel2 data in the form of monthly median composite images, for bands 3 and 8,  which are normalized to within 0-1. Data download from EE can be slow - to imrpove run time you can lower the scale (resolution of output) or run different years concurrently.
+#Requirements: have an Earth Enginge account and authenticate the environment after installing our dataloading_evn.yml file. 
 
 # Initialize the library.
 ee.Initialize()
