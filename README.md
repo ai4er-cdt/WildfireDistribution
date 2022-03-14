@@ -1,16 +1,22 @@
-[<img align="right" src=report/figures/logos/ESA_logo_simple.png width=47px>](https://www.esa.int/)
+[<img align="right" src=report/figures/logos/phi_labs.png width=48px>](https://philab.phi.esa.int/)
+[<img align="right" src=report/figures/logos/bas.png width=48px>](https://www.bas.ac.uk/)
 [<img align="right" src=report/figures/logos/AI4ER.png width=47px>](https://ai4er-cdt.esc.cam.ac.uk/)
 [<img align="right" src=report/figures/logos/bto_logo.png width=50px>](https://www.bto.org/)
 [<img align="right" src=report/figures/logos/UoC_logo.png width=60px>](https://www.cam.ac.uk/)
 
-# Wildfire Prediction
+# Using Convolutional Neural Networks for Wildfire Prediction in Polesia
 
  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 
 ## Project Focus
 
-The aim of this project has been to identify spatial relationships between wildfire distribution and climatic, topographical, pedological drivers of wildfire.
+The aim of this project has been to identify spatial relationships between wildfire distribution and climatic, topographical, pedological drivers of wildfire. This was to be achieved by utilising convolutional neural networks (CNNs) to reduce the dimensionality of land cover and climatic datasets.
+
+To narrow the geospatial bounds of the project, a study area was defined which encompassed the north of Ukraine and the south of Belarus, the rough region being known by the name Polesia.
+
+![Polesia Study Area](report/figures/study_area_illustration.png?raw=true "Polesia in relation to Europe as a whole.")
+<font size="1">Figure 1: Polesia's bounds in relation to the rest of Europe. The magnification provides clearer bounds of both Polesia and the Project Area in relation to Belarus and it's neighbour Ukraine. The map used is provided by OpenStreetMaps under an ODbL [OSM, 2022] whilst the plotting itself was done by QGIS which is publicly available under the GNU GPL [QGIS, 2022].</font>
 
 
 
@@ -27,11 +33,9 @@ The aim of this project has been to identify spatial relationships between wildf
 - how to set up the environment with the config file
 - how to run the train script from the command line
 
-
 ## Example usage
 
 - show some plots of results
-
 
 ## Project Organization
 ```
@@ -72,6 +76,46 @@ The aim of this project has been to identify spatial relationships between wildf
 To automatically format your code, make sure you have `black` installed (`pip install black`) and call
 ```black . ``` 
 from within the project directory.
+
+## Contributors & Organisations
+
+### Contributors
+Project Core Members:
+
+- Campbell, Hamish. *(AI4ER Cohort-2021, University of Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=20px>](https://github.com/Hamish-Cam)[<img align="right" src=report/figures/logos/AI4ER.png width=15px>](https://ai4er-cdt.esc.cam.ac.uk/StaffDirectory/students-all/2021-students)
+
+- Colverd, Grace. *(AI4ER Cohort-2021, University of Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=20px>](https://github.com/graceebc9)[<img align="right" src=report/figures/logos/AI4ER.png width=15px>](https://ai4er-cdt.esc.cam.ac.uk/StaffDirectory/students-all/2021-students)
+
+- Højlund-Dodd, Thomas. *(AI4ER Cohort-2021, University of Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=20px>](https://github.com/ThomasDodd97)[<img align="right" src=report/figures/logos/AI4ER.png width=15px>](https://ai4er-cdt.esc.cam.ac.uk/StaffDirectory/students-all/2021-students)[<img align="right" src=report/figures/logos/ORCID_iD.png width=15px>](https://orcid.org/0000-0001-9690-8627)
+
+- Stefanović, Sofija. *(AI4ER Cohort-2021, University of Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=20px>](https://github.com/sofstef)[<img align="right" src=report/figures/logos/AI4ER.png width=15px>](https://ai4er-cdt.esc.cam.ac.uk/StaffDirectory/students-all/2021-students)
+
+Technical Support Members:
+
+- Rogers, Martin. *(AI Lab, British Antarctic Survey (BAS), Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=20px>](https://github.com/MartinSJRogers)[<img align="right" src=report/figures/logos/bas.png width=18px>](https://www.bas.ac.uk/profile/user_3491-2/)
+
+- Wheeler, James. *(Phi Lab, European Space Agency (ESA))*[<img align="right" src=report/figures/logos/phi_labs.png width=18px>](https://philab.phi.esa.int/our-people/)
+
+Domain Support Members:
+
+- Ashton-Butt, Adham. *(British Trust for Ornithology (BTO))*[<img align="right" src=report/figures/logos/bto_logo.png width=18px>](https://www.bto.org/about-bto/our-staff/adham-ashton-butt)
+
+### Organisations:
+
+University of Cambridge:
+- AI for the study of Environmental Risks (AI4ER), UKRI Centre for Doctoral Training, Cambridge.[<img align="right" src=report/figures/logos/AI4ER.png width=17px>](https://ai4er-cdt.esc.cam.ac.uk/)
+
+AI4EO Initiative of ESA's Φ-Lab
+- AI for Earth Observation (AI4EO) Initiative, Φ-lab Division of the Future Systems Department of the EO Programmes Directorate, European Space Agency (ESA).[<img align="right" src=report/figures/logos/ESA_logo_simple.png width=18px>](https://www.esa.int/)[<img align="right" src=report/figures/logos/phi_labs.png width=18px>](https://philab.phi.esa.int/)[<img align="right" src=report/figures/logos/ai4eo.png width=40px>](https://ai4eo.de/)
+
+AI4EO Partner:
+- British Trust for Ornithology (BTO), Norfolk.[<img align="right" src=report/figures/logos/bto_logo.png width=18px>](https://www.bto.org/)
+
+## References
+
+OSM. (2022) 'Map of Europe' Available at: https://www.openstreetmap.org/about (Accessed: 14 March 2022)
+
+QGIS. (2022) 'QGIS Version 3.22.3-Białowieża' Available at: https://www.qgis.org/en/site/forusers/download.html (Accessed: 14 March 2022)
 
 ---
 
