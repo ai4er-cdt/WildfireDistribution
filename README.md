@@ -1,7 +1,7 @@
-<br></br>
-[<img align="right" src=report/figures/logos/bto_logo.png width=50px>](https://bas.ac.uk/ai)
-[<img align="right" src=report/figures/logos/UoC_logo.png width=60px>](https://ai4er-cdt.esc.cam.ac.uk/)
-
+<!-- <br></br> -->
+[<img align="right" src=report/figures/logos/AI4ER.png width=45px>](https://ai4er-cdt.esc.cam.ac.uk/)
+[<img align="right" src=report/figures/logos/bto_logo.png width=50px>](https://www.bto.org/)
+[<img align="right" src=report/figures/logos/UoC_logo.png width=60px>](https://www.cam.ac.uk/)
 
 # Predicting Wildfires
 
