@@ -1,4 +1,9 @@
-# Predicting wildfires
+<br></br>
+[<img align="right" src=report/figures/logos/bto_logo.png width=50px>](https://bas.ac.uk/ai)
+[<img align="right" src=report/figures/logos/UoC_logo.png width=60px>](https://ai4er-cdt.esc.cam.ac.uk/)
+
+
+# Predicting Wildfires
 
  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
