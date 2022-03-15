@@ -170,7 +170,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
                 self.sentinel_root_dir,
                 landcover.crs,
                 landcover.res,
-                bands=["B03", "B04", "B08"],
+                bands=["B03", "B08"],
                 transforms=self.get_sample,
             )
             self.dataset = self.dataset & sentinel
