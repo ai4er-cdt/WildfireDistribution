@@ -21,7 +21,6 @@ def main():
         one_hot_encode=False,
         balance_samples=True,
         burn_prop=1.0,
-        grid_sampler=False,
     )
 
     # ignore_zeros=True corresponds to ignoring the background class
@@ -34,6 +33,9 @@ def main():
         num_filters=64,
         num_classes=2,
         loss="jaccard",
+        # tversky_alpha=0.7,
+        # tversky_beta=0.3,
+        # tversky_gamma=1.0,
         learning_rate=0.1,
         ignore_zeros=True,
         learning_rate_schedule_patience=5,
@@ -42,7 +44,7 @@ def main():
     wandb_logger = WandbLogger(
         project="Wildfires",
         log_model="all",
-        name="all_fire_training_ignore_background_in_jaccardIndex",
+        name="100eps_jaccard_loss",
     )
 
     callbacks = [
@@ -54,7 +56,7 @@ def main():
     trainer = Trainer(
         gpus=1,
         min_epochs=1,
-        max_epochs=10,
+        max_epochs=100,
         logger=wandb_logger,
         log_every_n_steps=2,
         callbacks=callbacks,
@@ -63,16 +65,17 @@ def main():
 
     wandb_logger.watch(model)
 
+    # this is used when automatically finding the learning rate
     trainer.tune(
         model, datamodule
-    )  # this is used when automatically finding the learning rate
+    )  
     trainer.fit(model, datamodule)
 
 
 if __name__ == "__main__":
 
     # set random seed for reproducibility
-    pl.seed_everything(42)
+    pl.seed_everything(0)
 
     # TRAIN
     main()
