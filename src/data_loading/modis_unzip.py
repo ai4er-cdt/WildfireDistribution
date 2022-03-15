@@ -90,8 +90,3 @@ def unzip_all_modis_fire_files(output_path):
             file.close()
 
     print("Unzipped all MODIS files, bye!")
-
-#Now run the unzip
-if __name__ == '__main__':
-    outdir = '/home/users/graceebc/test'
-    unzip_all_modis_fire_files(outdit)

@@ -36,9 +36,14 @@ class Sentinel2(Sentinel):
     # filename format than the official documentation
     # https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-2-msi/naming-convention
     # https://sentinel.esa.int/documents/247904/685211/Sentinel-2-MSI-L2A-Product-Format-Specifications.pdf
-    filename_glob = "*B0*.tif"
-    filename_regex = "(?P<date>\d{6})_.*"
-    date_format = "%Y%m"
+    filename_glob = "T*B0*.jp2"
+    filename_regex = r"""
+    ^T(?P<tile>\d{2}[A-Z]{3})
+    _(?P<date>\d{8}T\d{6})
+    _(?P<band>B[018][\dA])
+    \..*$
+"""
+    date_format = "%Y%m%dT%H%M%S"
 
     # https://gisgeography.com/sentinel-2-bands-combinations/
     all_bands = [
