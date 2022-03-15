@@ -8,7 +8,6 @@ import pytorch_lightning as pl
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchgeo.samplers.batch import RandomBatchGeoSampler
-from torchgeo.samplers.single import GridGeoSampler
 from torchgeo.datasets import stack_samples
 from torchgeo.samplers.constants import Units
 
@@ -46,13 +45,11 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         # patch_size: int = 0.0459937425469195,  # stable version
         one_hot_encode: bool = False,
         balance_samples: bool = False,  # whether or not to constrain the sampler
-        burn_prop: float = 0.5,
-        grid_sampler: bool = False,
+        burn_prop: float = 1,
         units: Units = Units.PIXELS,
         **kwargs: Any,
     ) -> None:
         """Initialize a LightningDataModule for MODIS and Landcover based DataLoaders.
-
         Args:
             modis_root_dir: directory containing MODIS data
             landcover_root_dir: directory containing (Polesia) landcover data
@@ -64,9 +61,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             one_hot_encode: set True to one hot encode landcover classes
             balance_samples: set True to get more samples with fires in training
             burn_prop: the proportion of burned samples to take per batch
-            grid_sampler: set True to use a grid sampler for val/test
             units: whether to use pixels or CRS units for sizes
-
         """
         super().__init__()  # type: ignore[no-untyped-call]
         self.modis_root_dir = modis_root_dir
@@ -81,7 +76,6 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         self.one_hot_encode = one_hot_encode
         self.balance_samples = balance_samples
         self.burn_prop = burn_prop
-        self.grid_sampler = grid_sampler
         self.units = units
 
     def modis_transforms(self, sample: Dict[str, Any]) -> Dict[str, Any]:
@@ -143,9 +137,7 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
 
     def setup(self, stage: Optional[str] = None) -> None:
         """Initialize the main ``Dataset`` objects.
-
         This method is called once per GPU per run.
-
         Args:
             stage: state to set up
         """
@@ -198,22 +190,29 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
                 roi=roi,
                 units=self.units,
             )
+            self.val_sampler = ConstrainedRandomBatchGeoSampler(
+                dataset=self.dataset,
+                size=self.patch_size,
+                batch_size=self.batch_size,
+                length=self.length,
+                burn_prop=self.burn_prop,
+                roi=roi,
+                units=self.units,
+            )
+            self.test_sampler = ConstrainedRandomBatchGeoSampler(
+                dataset=self.dataset,
+                size=self.patch_size,
+                batch_size=self.batch_size,
+                length=self.length,
+                burn_prop=self.burn_prop,
+                roi=roi,
+                units=self.units,
+            )
 
         else:
             self.train_sampler = RandomBatchGeoSampler(
                 self.dataset, self.patch_size, self.batch_size, self.length, roi
             )
-
-        if self.grid_sampler:
-            # TODO: we probably want to change the ROI's to some consistent sub-area rather than the whole Polesia region!
-            self.val_sampler = GridGeoSampler(
-                self.dataset, self.patch_size, self.stride, roi
-            )
-            self.test_sampler = GridGeoSampler(
-                self.dataset, self.patch_size, self.stride, roi
-            )
-
-        else:
             self.val_sampler = RandomBatchGeoSampler(
                 self.dataset, self.patch_size, self.batch_size, self.length, roi
             )
@@ -223,7 +222,6 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
 
     def train_dataloader(self) -> DataLoader[Any]:
         """Return a DataLoader for training.
-
         Returns:
             training data loader
         """
@@ -236,48 +234,24 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
 
     def val_dataloader(self) -> DataLoader[Any]:
         """Return a DataLoader for validation.
-
         Returns:
             validation data loader
         """
-        if self.grid_sampler:
-            return DataLoader(
-                self.dataset,
-                batch_size=self.batch_size,
-                sampler=self.val_sampler,
-                num_workers=self.num_workers,
-                collate_fn=stack_samples,
-                shuffle=False,
-            )
-
-        else:
-            return DataLoader(
-                self.dataset,
-                batch_sampler=self.val_sampler,
-                num_workers=self.num_workers,
-                collate_fn=stack_samples,
-            )
+        return DataLoader(
+            self.dataset,
+            batch_sampler=self.val_sampler,
+            num_workers=self.num_workers,
+            collate_fn=stack_samples,
+        )
 
     def test_dataloader(self) -> DataLoader[Any]:
         """Return a DataLoader for testing.
-
         Returns:
             testing data loader
         """
-        if self.grid_sampler:
-            return DataLoader(
-                self.dataset,
-                batch_size=self.batch_size,
-                sampler=self.test_sampler,
-                num_workers=self.num_workers,
-                collate_fn=stack_samples,
-                shuffle=False,
-            )
-
-        else:
-            return DataLoader(
-                self.dataset,
-                batch_sampler=self.test_sampler,
-                num_workers=self.num_workers,
-                collate_fn=stack_samples,
-            )
+        return DataLoader(
+            self.dataset,
+            batch_sampler=self.test_sampler,
+            num_workers=self.num_workers,
+            collate_fn=stack_samples,
+        )
