@@ -7,6 +7,7 @@ from src.tasks import BinarySemanticSegmentationTask
 
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks import Callback
+from src.evaluation import LogPredictionsCallback
 
 
 def main():
@@ -48,6 +49,7 @@ def main():
     )
 
     callbacks = [
+        LogPredictionsCallback(),
         ModelCheckpoint(monitor="train_Accuracy", mode="max"),
         ModelCheckpoint(monitor="val_Accuracy", mode="max"),
         ModelCheckpoint(monitor="val_loss", mode="max"),
