@@ -26,17 +26,6 @@ class BinarySemanticSegmentationTask(LightningModule):
                 encoder_weights=self.hparams["encoder_weights"],
                 in_channels=self.hparams["in_channels"],
             )
-        elif self.hparams["segmentation_model"] == "deeplabv3+":
-            self.model = smp.DeepLabV3Plus(
-                encoder_name=self.hparams["encoder_name"],
-                encoder_weights=self.hparams["encoder_weights"],
-                in_channels=self.hparams["in_channels"],
-            )
-        elif self.hparams["segmentation_model"] == "fcn":
-            self.model = FCN(
-                in_channels=self.hparams["in_channels"],
-                num_filters=self.hparams["num_filters"],
-            )
         else:
             raise ValueError(
                 f"Model type '{self.hparams['segmentation_model']}' is not valid."
@@ -45,6 +34,14 @@ class BinarySemanticSegmentationTask(LightningModule):
         if self.hparams["loss"] == "jaccard":
             self.loss = smp.losses.JaccardLoss(
                 mode="binary",
+            )
+        # does it make sense to pass ignore zeros here or no?
+        elif self.hparams["loss"] == "tversky":
+            self.loss = smp.losses.TverskyLoss(
+                mode="binary",
+                alpha=self.hparams["tversky_alpha"],
+                beta=self.hparams["tversky_beta"],
+                gamma=self.hparams["tversky_gamma"],
             )
         elif self.hparams["loss"] == "focal":
             self.loss = smp.losses.FocalLoss(
@@ -75,9 +72,7 @@ class BinarySemanticSegmentationTask(LightningModule):
 
         self.train_metrics = MetricCollection(
             [
-                Accuracy(
-                    ignore_index=self.ignore_zeros,
-                ),
+                Accuracy(),
                 JaccardIndex(
                     num_classes=self.hparams["num_classes"],
                     ignore_index=self.ignore_zeros,
@@ -161,6 +156,9 @@ class BinarySemanticSegmentationTask(LightningModule):
                 summary_writer.add_figure(
                     f"image/{batch_idx}", fig, global_step=self.global_step
                 )
+                # wandb version
+                # self.logger.log_image(key="sample_images", images=)
+
             except AttributeError:
                 pass
 
