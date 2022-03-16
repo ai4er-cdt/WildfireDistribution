@@ -67,7 +67,6 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         self.modis_root_dir = modis_root_dir
         self.landcover_root_dir = landcover_root_dir
         self.sentinel_root_dir = sentinel_root_dir
-        self.landsat_root_dir = landsat_root_dir
         self.batch_size = batch_size
         self.length = length
         self.num_workers = num_workers
@@ -162,20 +161,10 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
                 self.sentinel_root_dir,
                 landcover.crs,
                 landcover.res,
-                bands=["B03", "B08"],
+                bands=["B03", "B08", "B11"],
                 transforms=self.get_sample,
             )
             self.dataset = self.dataset & sentinel
-
-        if self.landsat_root_dir is not None:
-            landsat = Landsat7(
-                self.landsat_root_dir,
-                landcover.crs,
-                landcover.res,
-                bands=["B2", "B3", "B4", "B5"],
-                transforms=self.get_sample,
-            )
-            self.dataset = self.dataset & landsat
 
         roi = self.dataset.bounds
 
