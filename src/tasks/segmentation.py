@@ -31,6 +31,7 @@ class BinarySemanticSegmentationTask(LightningModule):
                 f"Model type '{self.hparams['segmentation_model']}' is not valid."
             )
 
+        ## TO DO: lower threshold parameter
         if self.hparams["loss"] == "jaccard":
             self.loss = smp.losses.JaccardLoss(
                 mode="binary",
@@ -42,6 +43,7 @@ class BinarySemanticSegmentationTask(LightningModule):
                 alpha=self.hparams["tversky_alpha"],
                 beta=self.hparams["tversky_beta"],
                 gamma=self.hparams["tversky_gamma"],
+                # ignore_index=self.ignore_zeros,
             )
         elif self.hparams["loss"] == "focal":
             self.loss = smp.losses.FocalLoss(
@@ -72,7 +74,10 @@ class BinarySemanticSegmentationTask(LightningModule):
 
         self.train_metrics = MetricCollection(
             [
-                Accuracy(),
+                Accuracy(
+                    num_classes=self.hparams["num_classes"],
+                    ignore_index=self.ignore_zeros,
+                ),
                 JaccardIndex(
                     num_classes=self.hparams["num_classes"],
                     ignore_index=self.ignore_zeros,
@@ -156,8 +161,6 @@ class BinarySemanticSegmentationTask(LightningModule):
                 summary_writer.add_figure(
                     f"image/{batch_idx}", fig, global_step=self.global_step
                 )
-                # wandb version
-                # self.logger.log_image(key="sample_images", images=)
 
             except AttributeError:
                 pass
@@ -208,10 +211,11 @@ class BinarySemanticSegmentationTask(LightningModule):
         )
         return {
             "optimizer": optimizer,
-            "lr_scheduler": {
-                "scheduler": ReduceLROnPlateau(
-                    optimizer, patience=self.hparams["learning_rate_schedule_patience"]
-                ),
-                "monitor": "val_loss",
-            },
+            # "lr_scheduler": {
+            #     "scheduler": ReduceLROnPlateau(
+            #         optimizer,
+            #         # patience=self.hparams["learning_rate_schedule_patience"]
+            #     ),
+            #     "monitor": "val_loss",
+            # },
         }

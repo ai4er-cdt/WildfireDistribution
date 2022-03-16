@@ -8,7 +8,7 @@ import pytorch_lightning as pl
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchgeo.samplers.batch import RandomBatchGeoSampler
-from torchgeo.datasets import stack_samples
+from torchgeo.datasets import BoundingBox, stack_samples
 from torchgeo.samplers.constants import Units
 
 
@@ -41,12 +41,12 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         batch_size: int = 64,
         length: int = 256,
         num_workers: int = 0,
-        patch_size: int = 256,  # dav version
-        # patch_size: int = 0.0459937425469195,  # stable version
+        patch_size: int = 256,
         one_hot_encode: bool = False,
         balance_samples: bool = False,  # whether or not to constrain the sampler
         burn_prop: float = 1,
         units: Units = Units.PIXELS,
+        test_roi: Optional[BoundingBox] = None,
         **kwargs: Any,
     ) -> None:
         """Initialize a LightningDataModule for MODIS and Landcover based DataLoaders.
@@ -72,11 +72,11 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
         self.length = length
         self.num_workers = num_workers
         self.patch_size = patch_size
-        self.stride = patch_size - 1
         self.one_hot_encode = one_hot_encode
         self.balance_samples = balance_samples
         self.burn_prop = burn_prop
         self.units = units
+        self.test_roi = test_roi
 
     def modis_transforms(self, sample: Dict[str, Any]) -> Dict[str, Any]:
         # Binarize the samples
@@ -177,29 +177,14 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             )
             self.dataset = self.dataset & landsat
 
-        roi = self.dataset.bounds
+        if self.test_roi is not None:
+            roi = self.test_roi
+        else:
+            roi = self.dataset.bounds
 
         if self.balance_samples:
             print("Using a constrained sampler to get more samples with fires.")
             self.train_sampler = ConstrainedRandomBatchGeoSampler(
-                dataset=self.dataset,
-                size=self.patch_size,
-                batch_size=self.batch_size,
-                length=self.length,
-                burn_prop=self.burn_prop,
-                roi=roi,
-                units=self.units,
-            )
-            self.val_sampler = ConstrainedRandomBatchGeoSampler(
-                dataset=self.dataset,
-                size=self.patch_size,
-                batch_size=self.batch_size,
-                length=self.length,
-                burn_prop=self.burn_prop,
-                roi=roi,
-                units=self.units,
-            )
-            self.test_sampler = ConstrainedRandomBatchGeoSampler(
                 dataset=self.dataset,
                 size=self.patch_size,
                 batch_size=self.batch_size,
@@ -213,12 +198,13 @@ class MODISJDLandcoverSimpleDataModule(pl.LightningDataModule):
             self.train_sampler = RandomBatchGeoSampler(
                 self.dataset, self.patch_size, self.batch_size, self.length, roi
             )
-            self.val_sampler = RandomBatchGeoSampler(
-                self.dataset, self.patch_size, self.batch_size, self.length, roi
-            )
-            self.test_sampler = RandomBatchGeoSampler(
-                self.dataset, self.patch_size, self.batch_size, self.length, roi
-            )
+
+        self.val_sampler = RandomBatchGeoSampler(
+            self.dataset, self.patch_size, self.batch_size, self.length, roi
+        )
+        self.test_sampler = RandomBatchGeoSampler(
+            self.dataset, self.patch_size, self.batch_size, self.length, roi
+        )
 
     def train_dataloader(self) -> DataLoader[Any]:
         """Return a DataLoader for training.
