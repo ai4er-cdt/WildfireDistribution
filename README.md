@@ -10,7 +10,7 @@
  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 
 ## 1.0 - Background
-In late 2021, one of Cambridge's EPSRC-funded centre for doctoral training (CDT) program's by the name of 'AI for the study of environmental risks' (AI4ER) launched a group team challenge (GTC) amongst it's cohort of 2021. The cohort was split down the middle into two groups of 4, with one tasked with building a neural net capable of categorising ice and open water in the Antarctic's Bellinhausen Sea (Ice Group), whilst the other looked to create a neural net able to predict wildfire in the eastern European region of Polesia (Fire Group). Both of these projects were begun in December 2021 and due to end by March 2022.
+In late 2021, one of Cambridge's EPSRC-funded centre for doctoral training (CDT) program's by the name of 'AI for the study of environmental risks' (AI4ER) launched a group team challenge (GTC) amongst it's cohort of 2021. The cohort was split down the middle into two groups of 4, with one tasked with building a neural net capable of categorising ice and open water in the Antarctic's Bellinhausen Sea ('Ice Group'), whilst the other looked to create a neural net able to predict wildfire in the eastern European region of Polesia ('Fire Group'). Both of these projects were begun in December 2021 and due to end by March 2022.
 
 The European Space Agency's (ESA) Φ-lab Division (of the Future Systems Department of the EO Programmes Directorate within ESA) spawned an initiative by the name of AI for earth observation (AI4EO) in 2019. It was in collaboration with this initiative that Cambridge's AI4ER program created the dual GTC projects- the 'ice group' benefitted from the domain-specific guidance of the British Antarctic Survey (BAS), whilst the 'fire group' was aided by the British Ornithological Trust (BTO).
 
@@ -20,16 +20,30 @@ The aim of this project has been to identify spatial relationships between wildf
 To narrow the geospatial bounds of the project, a study area was defined which encompassed the north of Ukraine and the south of Belarus, the rough region being known by the name Polesia.
 
 ![Polesia Study Area](report/figures/study_area_illustration.png?raw=true "Polesia in relation to Europe as a whole.")
-<font size="1">Figure 1: Polesia's bounds in relation to the rest of Europe. The magnification provides clearer bounds of both Polesia and the Project Area in relation to Belarus and it's neighbour Ukraine. The map used is provided by OpenStreetMaps under an ODbL [OSM, 2022] whilst the plotting itself was done by QGIS which is publicly available under the GNU GPL [QGIS, 2022].</font>
+Figure 1: Polesia's bounds in relation to the rest of Europe. The magnification provides clearer bounds of both the Polesia project area and the land cover training sub-region in relation to the two countries of Belarus and Ukraine. The map used is provided by OpenStreetMaps under an [ODbL](https://opendatacommons.org/licenses/odbl/) [OSM, 2022] whilst the plotting itself was done by QGIS which is publicly available under the [GNU GPL](https://www.gnu.org/licenses/gpl-3.0.en.html) [QGIS, 2022].
+
+## 3.0 - Data
+### 3.1 - Target Dataset
+As directed by partners of this project, the target dataset used was the ['Fire_cci Burned Area dataset'](https://geogra.uah.es/fire_cci/firecci51.php) as generated and served by the ESA. This dataset was originally derived from spectral band data from [MODIS](https://lpdaac.usgs.gov/products/mod09gqv006/) alongside thermal data from [MODIS active fire products](https://modis-fire.umd.edu/index.html). As a target dataset, the burned/unburned classification of pixels within the study area provided a necessary ground truth with which to iteratively improve the neural networks performance when processing the predictor datasets.
+
+### 3.2 - Predictor Datasets
+3.2.1 - Landcover
+
+Based on previous work commissioned by the BTO, an earth engine based land cover classifier built by [Artio Earth Observation LLP](https://find-and-update.company-information.service.gov.uk/company/OC437578) was made available to this project via a public [github page](https://github.com/tpfd/Polesia-Landcover). This classifier was based on a random forest (RF) classification algorithm which had been pre-trained for a sub-region of Polesia (See Figure 1). By using this algorithm to generate a full landcover map of the entire project area (classifying every pixel into one of eight simple landcover types) a useful
+
+By classifying all the pixels in the project area into one of eight
+
+3.2.2 - 
+
+
 
 
 
 - what is this project about? 
 - where to find the data and how to access it
-- who is supporting this project (add their logos maybe)
 - adding a note on the license: CC-BY for reports, readme etc.
 
-## 3.0 - Requirements
+## 4.0 - Requirements
 - Python 3.9+
 
 ## Getting started/installation
@@ -104,7 +118,7 @@ Domain Support Members:
 
 - Ashton-Butt, Adham. *(British Trust for Ornithology (BTO))*[<img align="right" src=report/figures/logos/bto_logo.png width=25>](https://www.bto.org/about-bto/our-staff/adham-ashton-butt)
 
-### Organisations:
+### Organisations
 
 University of Cambridge:
 - AI for the study of Environmental Risks (AI4ER), UKRI Centre for Doctoral Training, Cambridge.[<img align="right" src=report/figures/logos/AI4ER.png width=25px>](https://ai4er-cdt.esc.cam.ac.uk/)
