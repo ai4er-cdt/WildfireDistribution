@@ -14,7 +14,7 @@ class LogPredictionsCallback(Callback):
               1: "burn",
             }
         
-        # Log the input, ground truth and prediction for the nth sample,
+        # Log the input(s), ground truth and prediction for the nth sample,
         # once per epoch, on the first batch in epoch
         n = 0
         if batch_idx == 0:
@@ -22,14 +22,35 @@ class LogPredictionsCallback(Callback):
             ground_truth = batch["mask"][n].detach().numpy()
             prediction_mask = batch["prediction"][n].detach().numpy()
 
-            wandb.log(
-                {"my_image_key" : wandb.Image(orig_image, masks={
-                    "predictions" : {
-                        "mask_data" : prediction_mask,
-                        "class_labels" : class_labels
-                    },
-                    "ground_truth" : {
-                        "mask_data" : ground_truth,
-                        "class_labels" : class_labels
-                    }
-                })})
+            # If using only landcover
+            if orig_image.shape[0] == 1:
+                wandb.log(
+                    {"Landcover / Prediction / Ground Truth" : wandb.Image(orig_image[0,:,:], masks={
+                          "predictions" : {
+                              "mask_data" : prediction_mask,
+                              "class_labels" : class_labels
+                          },
+                          "ground_truth" : {
+                              "mask_data" : ground_truth,
+                              "class_labels" : class_labels
+                          }
+                     })
+                 })
+
+            # If using the Sentinel data then log this too
+            else:
+                wandb.log(
+                    {"1. Sentinel Bands" : [wandb.Image(orig_image[1,:,:], caption="Band 3"), 
+                                        wandb.Image(orig_image[2,:,:], caption="Band 8"),
+                                        wandb.Image(orig_image[3,:,:], caption="Band 11")],
+                    "2. Landcover / Prediction / Ground Truth" : wandb.Image(orig_image[0,:,:], masks={
+                          "predictions" : {
+                              "mask_data" : prediction_mask,
+                              "class_labels" : class_labels
+                          },
+                          "ground_truth" : {
+                              "mask_data" : ground_truth,
+                              "class_labels" : class_labels
+                          }
+                     })
+                })
