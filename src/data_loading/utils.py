@@ -11,9 +11,97 @@ import tarfile
 import os
 import dateutil
 
+BASE_URL = "http://storage.googleapis.com/"
 
-#Functions to download Sentinel2 data in the form of monthly median composite images, for bands 3, 8 and 11, which are normalized to within 0-1. Data download from EE can be slow - to imrpove run time you can lower the scale (resolution of output) or run different years concurrently.
 
+def query_landsat(key_json, project_id, start, end, row, path, cloud=100.0):
+    """
+    Query Google BigQuery Landsat 7 data, returning the list of urls of scenes defined by the input parameters
+    
+    Inputs:
+    key_json: Credentials file downloaded from Console
+    project_id: id of projecgt set up within Console 
+    start: start date of interest
+    end: end dat of interest 
+    row: defines bounding box of interest
+    path: defines bounding box of interest 
+    cloud: level of cloud cover acceptable 
+    """
+    credentials = service_account.Credentials.from_service_account_file(key_json)
+    client = bigquery.Client(credentials=credentials, project=project_id)
+    query = client.query(
+        """
+                    SELECT * 
+                    FROM `bigquery-public-data.cloud_storage_geo_index.landsat_index` 
+                    where wrs_row = {r}
+                    and spacecraft_id = 'LANDSAT_7'
+                    and wrs_path = {p}
+                    and DATE(sensing_time) >  CAST('{s}' AS DATE)
+                    and DATE(sensing_time) < CAST('{e}' AS DATE)
+        """.format(
+            r=row, p=path, s=start, e=end
+        )
+    )
+    results = query.result()
+    df = results.to_dataframe()
+    good_scenes = []
+    for i, row in df.iterrows():
+        # print (row['product_id'], '; cloud cover:', row['cloud_cover'])
+        if float(row["cloud_cover"]) <= cloud:
+            if float(row["cloud_cover"]) <= cloud:
+                good_scenes.append(row["base_url"].replace("gs://", BASE_URL))
+    return good_scenes
+
+
+def download_landsat(outdir, bands, row_list, path_list, start, end, key_json, project_id, cloud):
+    """
+    Download the Landsat data into outdir, using Google Bigquery, for the bounding box, time period and bands defined.
+    
+    Inputs:
+    outdir: directory for data to go 
+    bands: bands to be downloaded from Landsat 
+    row_list: list of rows, defines bounding box of interest
+    path_list: list of paths, defines bounding box of interest
+    key_json: Credentials file downloaded from Console
+    project_id: id of projecgt set up within Console 
+    start: start date of interest
+    end: end dat of interest 
+    cloud: level of cloud cover acceptable 
+    
+    """
+    download_links = []
+    scene_names = []
+
+    for x in row_list:
+        row = x
+        for y in path_list:
+            path = y
+            scene_list = query_landsat(
+                key_json, project_id, start, end, row, path, cloud
+            )
+            for scene in scene_list:
+                scene_name = scene.split("/")[-1]
+
+                band_paths = [scene_name + str(band) for band in bands]
+                urls = [scene + "/" + str(band) for band in band_paths]
+                download_links = [*download_links, *urls]
+                scene_names = [*scene_names, *band_paths]
+
+    for down_url, name in zip(download_links, scene_names):
+        print("Starting file {}".format(name))
+        file_name = str(outdir) + str(name)
+
+        if os.path.exists(file_name) is False:
+            r = requests.get(down_url, allow_redirects=True)
+            try:
+                open(file_name, "wb").write(r.content)
+                print("File downloaded!")
+            except:
+                print("Download of {} failed".format(file_name))
+        else:
+            print("File already exists")
+            
+            
 def get_s2_sr_cld_col(aoi, start_date, end_date, CLOUD_FILTER):
     """Function taken from https://developers.google.com/earth-engine/tutorials/community/sentinel-2-s2cloudless
     """
