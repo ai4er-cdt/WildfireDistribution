@@ -44,7 +44,7 @@ There are four data sets used in this repository.
 [https://github.com/tpfd/Polesia-Landcover](https://github.com/tpfd/Polesia-Landcover])
 
 
-This generates both a ’simple’ and ’complex’ landcover mapping, with the former splitting out 9 categories or landcover, and the latter 13. You can download the classified tiles directly: 
+This generates both a ’simple’ and ’complex’ landcover mapping, with the former splitting out 9 categories of landcover, and the latter 13. You can download the classified tiles directly: 
 
 [Download Polesia Landcover Data ](https://github.com/graceebc9/Fire_data/tree/main/Classified)
 
