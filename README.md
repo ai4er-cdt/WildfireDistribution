@@ -33,7 +33,7 @@ This dataset was processed into monthly batches and each pixel was assigned a (b
 **3.2.1 - Landcover Types (Sentinel+Classifier)**
 
 Based on previous work commissioned by the BTO, a 'google earth engine' based land cover classifier built by [Artio Earth Observation LLP](https://find-and-update.company-information.service.gov.uk/company/OC437578) was made available to this project via a public [github page](https://github.com/tpfd/Polesia-Landcover). This classifier was based on a random forest (RF) classification algorithm which had been pre-trained for a sub-region of Polesia (See Figure 1). By using this algorithm on satellite imagery gathered by [Sentinel 2](https://sentinels.copernicus.eu/web/sentinel/sentinel-data-access), a full landcover map of the entire project area was generated (classifying pixels into one of nine simple landcover types) with a maximum spatial resolution of 20m (See Figure 3).
-![Land Cover Polesia](report/figures/SimpleLandCoverMosaic_2018_2.png?raw=true "Land cover generated for Polesia")
+![Land Cover Polesia](report/figures/SimpleLandCoverMosaic_2018.png?raw=true "Land cover generated for Polesia")
 *Figure 3 - Land cover map for 2018 generated using the RF algorithm in combination with Sentinel satellite imagery.*
 
 **3.2.2 - Snow Cover/Depth, Soil Moisture, Surface Temperature (ERA5)**
