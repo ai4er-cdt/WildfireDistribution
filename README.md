@@ -10,35 +10,37 @@
  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 
 ## 1.0 - Background
-In late 2021, one of Cambridge's EPSRC-funded centre for doctoral training (CDT) program's by the name of 'AI for the study of environmental risks' (AI4ER) launched a group team challenge (GTC) amongst it's cohort of 2021. The cohort was split down the middle into two groups of 4, with one tasked with building a neural net capable of categorising ice and open water in the Antarctic's Bellinhausen Sea ('Ice Group'), whilst the other looked to create a neural net able to predict wildfire in the eastern European region of Polesia ('Fire Group'). Both of these projects were begun in December 2021 and due to end by March 2022.
+In late 2021, one of Cambridge's EPSRC-funded centre for doctoral training (CDT) programs by the name of 'AI for the study of environmental risks' (AI4ER) launched a group team challenge (GTC) amongst it's cohort of 2021. The cohort was split down the middle into two groups of 4, with one tasked with building a neural net (NN) capable of categorising ice and open water in the Antarctic's Bellinhausen Sea ('Ice Group'), whilst the other looked to create a NN able to predict wildfire in the eastern European region of Polesia ('Fire Group'). Both of these projects were begun in December 2021 and due to end by March 2022.
 
 The European Space Agency's (ESA) Φ-lab Division (of the Future Systems Department of the EO Programmes Directorate within ESA) spawned an initiative by the name of AI for earth observation (AI4EO) in 2019. It was in collaboration with this initiative that Cambridge's AI4ER program created the dual GTC projects- the 'ice group' benefitted from the domain-specific guidance of the British Antarctic Survey (BAS), whilst the 'fire group' was aided by the British Ornithological Trust (BTO).
 
-## 2.0 - Aim
-The aim of this project has been to identify spatial relationships between wildfire distribution and climatic, topographical, pedological drivers of wildfire. This was to be achieved by utilising convolutional neural networks (CNNs) to reduce the dimensionality of various geospatial datasets. The motivation for such an endeavour was to provide a new tool for prediction of wildfire genesis, perhaps facilitating the mitigation of future destructive wildfire events; which are known to cause damage to local ecosystems if too frequent.
+## 2.0 - Aim & Introduction
+The aim of this project has been to identify spatial relationships between wildfire distribution and climatic, topographical, and pedological drivers of wildfire. This was to be achieved by utilising convolutional neural networks (CNNs) to reduce the dimensionality of various geospatial datasets. The motivation for such an endeavour was to provide a new tool for the prediction of wildfire genesis, perhaps facilitating the mitigation of future destructive wildfire events; which are known to cause damage to local ecosystems if too frequent.
 
 To narrow the geospatial bounds of the project, a study area was defined which encompassed the north of Ukraine and the south of Belarus, the rough region being known by the name Polesia.
 
 ![Polesia Study Area](report/figures/study_area_illustration2.png?raw=true "Polesia in relation to Europe as a whole.")
 Figure 1 - Polesia's bounds in relation to the rest of Europe. The magnification provides clearer bounds of both the Polesia project area and the land cover training sub-region in relation to the two countries of Belarus and Ukraine. The map used is provided by OpenStreetMaps under an [ODbL](https://opendatacommons.org/licenses/odbl/) [OSM, 2022] whilst the plotting itself was done by QGIS which is publicly available under the [GNU GPL](https://www.gnu.org/licenses/gpl-3.0.en.html) [QGIS, 2022].
 
+
+
 ## 3.0 - Data
 ### 3.1 - Target Dataset
 As directed by partners of this project, the target dataset used was the ['Fire_cci Burned Area dataset'](https://geogra.uah.es/fire_cci/firecci51.php) as generated and served by the ESA. This dataset was originally derived from spectral band data from [MODIS](https://lpdaac.usgs.gov/products/mod09gqv006/) alongside thermal data from [MODIS active fire products](https://modis-fire.umd.edu/index.html). 
-This dataset was processed into monthly batches and each pixel was assigned a (burn/no-burn) value (See Figure 2); this target dataset provided a necessary ground truth with which to iteratively improve the neural networks performance when processing the predictor datasets.
+This dataset was processed into monthly batches and each pixel was assigned a (burn/no-burn) value (See Figure 2); this target dataset provided a necessary ground truth with which to iteratively improve the NN's performance when processing the predictor datasets.
 ![Burn Coverage Polesia](report/figures/ModisBurnPlot_2020.png?raw=true "Burn Plot for March 2020 with burnt and unburnt apparent")
-Figure 3 - Simplified plot of MODIS-derived Fire_CCI51 dataset, with burnt and unburnt areas apparent for month 3 of 2020.
+Figure 3 - Simplified plot of MODIS-derived Fire_CCI51 dataset, with burnt and unburnt areas apparent for March 2020.
 
 ### 3.2 - Predictor Datasets
 3.2.1 - Landcover Types (Sentinel+Classifier)
 
-Based on previous work commissioned by the BTO, an earth engine based land cover classifier built by [Artio Earth Observation LLP](https://find-and-update.company-information.service.gov.uk/company/OC437578) was made available to this project via a public [github page](https://github.com/tpfd/Polesia-Landcover). This classifier was based on a random forest (RF) classification algorithm which had been pre-trained for a sub-region of Polesia (See Figure 1). By using this algorithm on satellite imagery gathered by Sentinel, a full landcover map of the entire project area was generated (classifying pixels into one of nine simple landcover types) with a maximum spatial resolution of 20m (See Figure 3).
+Based on previous work commissioned by the BTO, a 'google earth engine' based land cover classifier built by [Artio Earth Observation LLP](https://find-and-update.company-information.service.gov.uk/company/OC437578) was made available to this project via a public [github page](https://github.com/tpfd/Polesia-Landcover). This classifier was based on a random forest (RF) classification algorithm which had been pre-trained for a sub-region of Polesia (See Figure 1). By using this algorithm on satellite imagery gathered by [Sentinel 2](https://sentinels.copernicus.eu/web/sentinel/sentinel-data-access), a full landcover map of the entire project area was generated (classifying pixels into one of nine simple landcover types) with a maximum spatial resolution of 20m (See Figure 3).
 ![Land Cover Polesia](report/figures/SimpleLandCoverMosaic_2018_2.png?raw=true "Land cover generated for Polesia")
-Figure 3 - Land cover map for 2018 generated using the random forest model in combination with Sentinel satellite imagery.
+Figure 3 - Land cover map for 2018 generated using the RF algorithm in combination with Sentinel satellite imagery.
 
-3.2.2 - Surface Temperature, Snow Cover/Depth, Soil Moisture (ERA5)
+3.2.2 - Snow Cover/Depth, Soil Moisture, Surface Temperature (ERA5)
 
-To obtain datasets pertaining to potential climatological, cryological and pedological predictors of wildfires, [ERA5 reananalysis data](https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5) generated by the European Centre for Medium-Range Weather Forecasts ([ECMWF](https://www.ecmwf.int/)) was obtained. By selectively downloading and splitting apart ERA5 netCDF files it was possible to obtain three important predictor datasets: 2m surface temperature (K), snow cover, snow depth (m of water equivalent), and soil moisture (m<sup>3</sup> water m<sup>-3</sup> soil). All of the reanalysis datasets retained their 31km spatial resolution.
+To obtain datasets pertaining to potential cryological, pedological, and climatological predictors of wildfires, [ERA5 reananalysis data](https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5) generated by the European Centre for Medium-Range Weather Forecasts ([ECMWF](https://www.ecmwf.int/)) was obtained. By selectively downloading and splitting apart ERA5 netCDF files it was possible to obtain three important predictor datasets:  snow cover, snow depth (m of water equivalent), soil moisture (m<sup>3</sup> H<sub>2</sub>O m<sup>-3</sup> soil), and 2m surface temperature (K). All of the reanalysis datasets retained their 31km spatial resolution.
 
 ![Snow Depth and Cover Polesia 2020](report/figures/era5_snow_2020.png?raw=true "ERA5 snow data")
 Figure 4 - Snow depth and cover across Polesia in December 2020 based on ERA5 reanalysis dataset.
@@ -48,6 +50,15 @@ Figure 5 - Soil moisture across Polesia in December 2020 based on ERA5 reanalysi
 
 ![Surface Air Temperature 2020](report/figures/era5_temp_2020.png?raw=true "ERA5 surface air temperature data")
 Figure 6 - Surface air temperature across Polesia in December 2020 based on ERA5 reanalysis dataset.
+
+3.2.3 - Normalised Differential Moisture and Water Index (NDMI, NDWI)
+
+Two further predictors considered were the NDMI which estimates the moisture content of vegetation and the NDWI which is sensitive to changes in water content in bodies of water. 
+
+As proxies for these two indices can be adapted from specific spectral bands in satellite imagery, Sentinel-2 data was deemed a suitable dataset to utilise due to its spatial resolution of 20m and its temporal timeframe of 2016-2020. In general, [NDMI](https://www.usgs.gov/landsat-missions/normalized-difference-moisture-index) is calculated using NIR and SWIR bands (NIR-SWIR/NIR+SWIR), whilst [NDWI](https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/ndwi/#:~:text=The%20NDWI%20is%20used%20to,over%2Destimation%20of%20water%20bodies.) is calculated using GREEN and NIR bands (GREEN-NIR/GREEN+NIR). In the specific case of Sentinel-2 data, [NDMI](https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/ndmi/) was estimated using bands 8 & 11 (B08-B11/B08+B11) as proxies for NIR & SWIR, whilst [NDWI](https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/ndwi/#:~:text=The%20NDWI%20is%20used%20to,over%2Destimation%20of%20water%20bodies.) required bands 3 & 8 (B03-B08/B03+B08). For the sake of visualisation, Figures 7 & 8 provide plots of NDWI and NDMI respectively for June 2020. Although, in practice no pre-processing was done to bands before being used in the CNN (i.e. B03, B08, and B11 were fed into the CNN as raw data) as such manual dimensionality reduction would be functionally redundant.
+
+
+
 
 - what is this project about? 
 - where to find the data and how to access it
