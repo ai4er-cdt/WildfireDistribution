@@ -8,10 +8,14 @@ import datetime
 import os
 import numpy as np
 import tarfile
-import os
 import dateutil
 
-BASE_URL = "http://storage.googleapis.com/"
+
+import glob
+import re
+import shutil
+
+
 
 
 def query_landsat(key_json, project_id, start, end, row, path, cloud=100.0):
@@ -29,6 +33,7 @@ def query_landsat(key_json, project_id, start, end, row, path, cloud=100.0):
     """
     credentials = service_account.Credentials.from_service_account_file(key_json)
     client = bigquery.Client(credentials=credentials, project=project_id)
+    BASE_URL = "http://storage.googleapis.com/"
     query = client.query(
         """
                     SELECT * 
@@ -366,6 +371,48 @@ def pull_monthly_cloudless_sentinel(years,outdir, coords =( 50.77946266, 53.0444
 
                     print('Data exported!')
     return
+
+def clean_sentinel_folder(path, bad_path):
+    """
+    This function cleans up a folder to remove any date/tile combos that do not have all three bands- some are missing from GEE. 
+    Needed to sample successfully in Torch Lightning. 
+    Note this only works on folders containing only the bands noted below - run manual clean up on any other bands e.b. rm *B04.tif 
+    TODO: update to deal with multiple bands 
+    
+    Inputs: 
+    
+    path: path of folder to clean 
+    
+    bad_path: where to move files that dont have all three files 
+    
+    """
+    filename_regex = '^(?P<date>\\d{6})_(?P<tile>\\d{1,2})_(?P<band>B[018][\\dA]).tif$'
+    filename_glob = '*B0*.tif'
+
+    list_bands = ['B03', 'B08', 'B11']
+    list_files= os.listdir(path)
+    
+    good = [] 
+    date_tile_list = [] 
+    
+    for filename in list_files:
+        dt = filename[0:9]
+        date_tile_list.append(dt)
+
+    for dt in date_tile_list:
+        check = [s for s in list_files if dt in s]
+        check = list(dict.fromkeys(check))
+        if len(check) >= 3:
+            good.append(dt)
+
+    if os.path.isdir(bad_path) is False:
+        os.mkdir(bad_path)
+
+    for filename in list_files:
+        dt = filename[0:9]
+        if dt not in good:
+            print('bad files ' + filename)
+            shutil.move(os.path.join(path, filename) , os.path.join( bad_path, filename ) )
 
 
 def unzip_all_modis_fire_files(output_path):
