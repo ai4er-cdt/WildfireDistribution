@@ -25,7 +25,7 @@ class LogPredictionsCallback(Callback):
             # If using only landcover
             if orig_image.shape[0] == 1:
                 wandb.log(
-                    {"Landcover / Prediction / Ground Truth" : wandb.Image(orig_image[0,:,:], masks={
+                    {"Landcover - Prediction - Ground Truth" : wandb.Image(orig_image[0,:,:], masks={
                           "predictions" : {
                               "mask_data" : prediction_mask,
                               "class_labels" : class_labels
@@ -43,7 +43,7 @@ class LogPredictionsCallback(Callback):
                     {"1. Sentinel Bands" : [wandb.Image(orig_image[1,:,:], caption="Band 3"), 
                                         wandb.Image(orig_image[2,:,:], caption="Band 8"),
                                         wandb.Image(orig_image[3,:,:], caption="Band 11")],
-                    "2. Landcover / Prediction / Ground Truth" : wandb.Image(orig_image[0,:,:], masks={
+                    "2. Landcover - Prediction - Ground Truth" : wandb.Image(orig_image[0,:,:], masks={
                           "predictions" : {
                               "mask_data" : prediction_mask,
                               "class_labels" : class_labels
