@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from ..data_loading import LandcoverSimple, MODIS_JD, Sentinel2, Landsat7
+from ..datasets import LandcoverSimple, MODIS_JD, Sentinel2, Landsat7
 from ..samplers import ConstrainedRandomBatchGeoSampler
 
 import torch
