@@ -4,7 +4,7 @@ from .landsat import Landsat, Landsat7
 from .sentinel import Sentinel2
 
 # this is a bit of a clunky solution for now (for modis unzip)
-from .download_modis_unzip import unzip_all_modis_fire_files
+from .utils import unzip_all_modis_fire_files, pull_monthly_cloudless_sentinel, download_landsat
 from .landcover import LandcoverSimple, LandcoverComplex
 
 __all__ = (
@@ -18,4 +18,6 @@ __all__ = (
     "unzip_all_modis_fire_files",
     "Landsat7",
     "Sentinel2",
+    "pull_monthly_cloudless_sentinel",
+    "download_landsat",
 )
