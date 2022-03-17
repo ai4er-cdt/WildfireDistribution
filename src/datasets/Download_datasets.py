@@ -20,7 +20,7 @@
 # In[ ]:
 
 
-from src.data_loading import unzip_all_modis_fire_files, pull_monthly_cloudless_sentinel, clean_sentinel_folder
+from .utils import unzip_all_modis_fire_files, pull_monthly_cloudless_sentinel, clean_sentinel_folder
 
 
 # In[ ]:
