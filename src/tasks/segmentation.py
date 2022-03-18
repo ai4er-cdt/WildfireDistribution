@@ -11,46 +11,61 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from torchmetrics import Accuracy, JaccardIndex, MetricCollection
 
+
 from torchgeo.datasets.utils import unbind_samples
 from torchgeo.models import FCN
 
+# https://github.com/pytorch/pytorch/issues/60979
+# https://github.com/pytorch/pytorch/pull/61045
+DataLoader.__module__ = "torch.utils.data"
 
-class BinarySemanticSegmentationTask(LightningModule):
+
+class SemanticSegmentationTask(LightningModule):
     """LightningModule for semantic segmentation of images."""
 
     def config_task(self) -> None:
         """Configures the task based on kwargs parameters passed to the constructor."""
-        if self.hparams["segmentation_model"] == "unet":
+        if self.hyperparams["segmentation_model"] == "unet":
             self.model = smp.Unet(
-                encoder_name=self.hparams["encoder_name"],
-                encoder_weights=self.hparams["encoder_weights"],
-                in_channels=self.hparams["in_channels"],
+                encoder_name=self.hyperparams["encoder_name"],
+                encoder_weights=self.hyperparams["encoder_weights"],
+                in_channels=self.hyperparams["in_channels"],
+                classes=self.hyperparams["num_classes"],
+            )
+        elif self.hyperparams["segmentation_model"] == "deeplabv3+":
+            self.model = smp.DeepLabV3Plus(
+                encoder_name=self.hyperparams["encoder_name"],
+                encoder_weights=self.hyperparams["encoder_weights"],
+                in_channels=self.hyperparams["in_channels"],
+                classes=self.hyperparams["num_classes"],
+            )
+        elif self.hyperparams["segmentation_model"] == "fcn":
+            self.model = FCN(
+                in_channels=self.hyperparams["in_channels"],
+                classes=self.hyperparams["num_classes"],
+                num_filters=self.hyperparams["num_filters"],
             )
         else:
             raise ValueError(
-                f"Model type '{self.hparams['segmentation_model']}' is not valid."
+                f"Model type '{self.hyperparams['segmentation_model']}' is not valid."
             )
 
-        ## TO DO: lower threshold parameter
-        if self.hparams["loss"] == "jaccard":
+        if self.hyperparams["loss"] == "ce":
+            self.loss = nn.CrossEntropyLoss(
+                ignore_index=-1000 if self.ignore_zeros is None else 0,
+                # weight=torch.tensor([1 - self.hyperparams["fire_class_weight"],
+                #                      self.hyperparams["fire_class_weight"]])
+            )
+        elif self.hyperparams["loss"] == "jaccard":
             self.loss = smp.losses.JaccardLoss(
-                mode="binary",
+                mode="multiclass", classes=self.hyperparams["num_classes"]
             )
-        # does it make sense to pass ignore zeros here or no?
-        elif self.hparams["loss"] == "tversky":
-            self.loss = smp.losses.TverskyLoss(
-                mode="binary",
-                alpha=self.hparams["tversky_alpha"],
-                beta=self.hparams["tversky_beta"],
-                gamma=self.hparams["tversky_gamma"],
-                # ignore_index=self.ignore_zeros,
-            )
-        elif self.hparams["loss"] == "focal":
+        elif self.hyperparams["loss"] == "focal":
             self.loss = smp.losses.FocalLoss(
                 "multiclass", ignore_index=self.ignore_zeros, normalized=True
             )
         else:
-            raise ValueError(f"Loss type '{self.hparams['loss']}' is not valid.")
+            raise ValueError(f"Loss type '{self.hyperparams['loss']}' is not valid.")
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize the LightningModule with a model and loss function.
@@ -60,13 +75,17 @@ class BinarySemanticSegmentationTask(LightningModule):
             encoder_weights: None or "imagenet" to use imagenet pretrained weights in
                 the encoder model
             in_channels: Number of channels in input image
+            num_classes: Number of semantic classes to predict
             loss: Name of the loss function
             ignore_zeros: Whether to ignore the "0" class value in the loss and metrics
         Raises:
             ValueError: if kwargs arguments are invalid
         """
         super().__init__()
-        self.save_hyperparameters()  # creates `self.hparams` from kwargs
+
+        # Creates `self.hparams` from kwargs
+        self.save_hyperparameters()  # type: ignore[operator]
+        self.hyperparams = cast(Dict[str, Any], self.hparams)
 
         self.ignore_zeros = None if kwargs["ignore_zeros"] else 0
 
@@ -75,11 +94,11 @@ class BinarySemanticSegmentationTask(LightningModule):
         self.train_metrics = MetricCollection(
             [
                 Accuracy(
-                    num_classes=self.hparams["num_classes"],
+                    num_classes=self.hyperparams["num_classes"],
                     ignore_index=self.ignore_zeros,
                 ),
                 JaccardIndex(
-                    num_classes=self.hparams["num_classes"],
+                    num_classes=self.hyperparams["num_classes"],
                     ignore_index=self.ignore_zeros,
                 ),
             ],
@@ -88,25 +107,23 @@ class BinarySemanticSegmentationTask(LightningModule):
         self.val_metrics = self.train_metrics.clone(prefix="val_")
         self.test_metrics = self.train_metrics.clone(prefix="test_")
 
-    def forward(self, x: Tensor) -> Any:  # type: ignore[override]
+    def forward(self, *args: Any, **kwargs: Any) -> Any:
         """Forward pass of the model.
         Args:
             x: tensor of data to run through the model
         Returns:
             output from the model
         """
-        return self.model(x)
+        return self.model(*args, **kwargs)
 
-    def training_step(  # type: ignore[override]
-        self, batch: Dict[str, Any], batch_idx: int
-    ) -> Tensor:
-        """Training step - reports average accuracy and average JaccardIndex.
+    def training_step(self, *args: Any, **kwargs: Any) -> Tensor:
+        """Compute and return the training loss.
         Args:
-            batch: Current batch
-            batch_idx: Index of current batch
+            batch: the output of your DataLoader
         Returns:
             training loss
         """
+        batch = args[0]
         x = batch["image"]
         y = batch["mask"]
         y_hat = self.forward(x)
@@ -129,16 +146,14 @@ class BinarySemanticSegmentationTask(LightningModule):
         self.log_dict(self.train_metrics.compute())
         self.train_metrics.reset()
 
-    def validation_step(  # type: ignore[override]
-        self, batch: Dict[str, Any], batch_idx: int
-    ) -> None:
-        """Validation step - reports average accuracy and average JaccardIndex.
-        Logs the first 10 validation samples to tensorboard as images with 3 subplots
-        showing the image, mask, and predictions.
+    def validation_step(self, *args: Any, **kwargs: Any) -> None:
+        """Compute validation loss and log example predictions.
         Args:
-            batch: Current batch
-            batch_idx: Index of current batch
+            batch: the output of your DataLoader
+            batch_idx: the index of this batch
         """
+        batch = args[0]
+        batch_idx = args[1]
         x = batch["image"]
         y = batch["mask"]
         y_hat = self.forward(x)
@@ -161,7 +176,6 @@ class BinarySemanticSegmentationTask(LightningModule):
                 summary_writer.add_figure(
                     f"image/{batch_idx}", fig, global_step=self.global_step
                 )
-
             except AttributeError:
                 pass
 
@@ -173,14 +187,12 @@ class BinarySemanticSegmentationTask(LightningModule):
         self.log_dict(self.val_metrics.compute())
         self.val_metrics.reset()
 
-    def test_step(  # type: ignore[override]
-        self, batch: Dict[str, Any], batch_idx: int
-    ) -> None:
-        """Test step identical to the validation step.
+    def test_step(self, *args: Any, **kwargs: Any) -> None:
+        """Compute test loss.
         Args:
-            batch: Current batch
-            batch_idx: Index of current batch
+            batch: the output of your DataLoader
         """
+        batch = args[0]
         x = batch["image"]
         y = batch["mask"]
         y_hat = self.forward(x)
@@ -207,15 +219,15 @@ class BinarySemanticSegmentationTask(LightningModule):
             https://pytorch-lightning.readthedocs.io/en/latest/common/lightning_module.html#configure-optimizers
         """
         optimizer = torch.optim.Adam(
-            self.model.parameters(), lr=self.hparams["learning_rate"]
+            self.model.parameters(), lr=self.hyperparams["learning_rate"]
         )
         return {
             "optimizer": optimizer,
-            # "lr_scheduler": {
-            #     "scheduler": ReduceLROnPlateau(
-            #         optimizer,
-            #         # patience=self.hparams["learning_rate_schedule_patience"]
-            #     ),
-            #     "monitor": "val_loss",
-            # },
+            "lr_scheduler": {
+                "scheduler": ReduceLROnPlateau(
+                    optimizer,
+                    patience=self.hyperparams["learning_rate_schedule_patience"],
+                ),
+                "monitor": "val_loss",
+            },
         }
