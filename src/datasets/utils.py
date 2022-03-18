@@ -1,17 +1,112 @@
 #!/usr/bin/env python
 # coding: utf-8
+
+#Utils file for sentinel and modis download 
 import ee
 import geemap
 import datetime
 import os
 import numpy as np
+import tarfile
+import dateutil
 
-#This script download Sentinel2 data in the form of monthly median composite images, for bands 3 and 8,  which are normalized to within 0-1. Data download from EE can be slow - to imrpove run time you can lower the scale (resolution of output) or run different years concurrently.
-#Requirements: have an Earth Enginge account and authenticate the environment after installing our dataloading_evn.yml file. 
 
-# Initialize the library.
-ee.Initialize()
+import glob
+import re
+import shutil
 
+
+
+
+def query_landsat(key_json, project_id, start, end, row, path, cloud=100.0):
+    """
+    Query Google BigQuery Landsat 7 data, returning the list of urls of scenes defined by the input parameters
+    
+    Inputs:
+    key_json: Credentials file downloaded from Console
+    project_id: id of projecgt set up within Console 
+    start: start date of interest
+    end: end dat of interest 
+    row: defines bounding box of interest
+    path: defines bounding box of interest 
+    cloud: level of cloud cover acceptable 
+    """
+    credentials = service_account.Credentials.from_service_account_file(key_json)
+    client = bigquery.Client(credentials=credentials, project=project_id)
+    BASE_URL = "http://storage.googleapis.com/"
+    query = client.query(
+        """
+                    SELECT * 
+                    FROM `bigquery-public-data.cloud_storage_geo_index.landsat_index` 
+                    where wrs_row = {r}
+                    and spacecraft_id = 'LANDSAT_7'
+                    and wrs_path = {p}
+                    and DATE(sensing_time) >  CAST('{s}' AS DATE)
+                    and DATE(sensing_time) < CAST('{e}' AS DATE)
+        """.format(
+            r=row, p=path, s=start, e=end
+        )
+    )
+    results = query.result()
+    df = results.to_dataframe()
+    good_scenes = []
+    for i, row in df.iterrows():
+        # print (row['product_id'], '; cloud cover:', row['cloud_cover'])
+        if float(row["cloud_cover"]) <= cloud:
+            if float(row["cloud_cover"]) <= cloud:
+                good_scenes.append(row["base_url"].replace("gs://", BASE_URL))
+    return good_scenes
+
+
+def download_landsat(outdir, bands, row_list, path_list, start, end, key_json, project_id, cloud):
+    """
+    Download the Landsat data into outdir, using Google Bigquery, for the bounding box, time period and bands defined.
+    
+    Inputs:
+    outdir: directory for data to go 
+    bands: bands to be downloaded from Landsat 
+    row_list: list of rows, defines bounding box of interest
+    path_list: list of paths, defines bounding box of interest
+    key_json: Credentials file downloaded from Console
+    project_id: id of projecgt set up within Console 
+    start: start date of interest
+    end: end dat of interest 
+    cloud: level of cloud cover acceptable 
+    
+    """
+    download_links = []
+    scene_names = []
+
+    for x in row_list:
+        row = x
+        for y in path_list:
+            path = y
+            scene_list = query_landsat(
+                key_json, project_id, start, end, row, path, cloud
+            )
+            for scene in scene_list:
+                scene_name = scene.split("/")[-1]
+
+                band_paths = [scene_name + str(band) for band in bands]
+                urls = [scene + "/" + str(band) for band in band_paths]
+                download_links = [*download_links, *urls]
+                scene_names = [*scene_names, *band_paths]
+
+    for down_url, name in zip(download_links, scene_names):
+        print("Starting file {}".format(name))
+        file_name = str(outdir) + str(name)
+
+        if os.path.exists(file_name) is False:
+            r = requests.get(down_url, allow_redirects=True)
+            try:
+                open(file_name, "wb").write(r.content)
+                print("File downloaded!")
+            except:
+                print("Download of {} failed".format(file_name))
+        else:
+            print("File already exists")
+            
+            
 def get_s2_sr_cld_col(aoi, start_date, end_date, CLOUD_FILTER):
     """Function taken from https://developers.google.com/earth-engine/tutorials/community/sentinel-2-s2cloudless
     """
@@ -47,6 +142,7 @@ def add_cloud_bands(img, CLD_PRB_THRESH):
 
     # Add the cloud probability layer and cloud mask as image bands.
     return img.addBands(ee.Image([cld_prb, is_cloud]))
+
 
 def add_shadow_bands(img, NIR_DRK_THRESH, CLD_PRJ_DIST):
         """Function taken from https://developers.google.com/earth-engine/tutorials/community/sentinel-2-s2cloudless
@@ -108,8 +204,6 @@ def apply_cld_shdw_mask(img):
 
     # Subset reflectance bands and update their masks, return the result.
     return img.select('B.*').updateMask(not_cld_shdw)
-
-
 
 
 def pull_composite_image(START_DATE, END_DATE, AOI):
@@ -186,7 +280,7 @@ def pairwise(iterable):
 def create_latlon_grid(minlat  = 50.77946266, maxlat=  53.04445373, minlon= 22.9446959 , maxlon= 32.08155782):
     """
     Create list of polygon geometry objects to iterate over with in earth engine in order to not overload memory. 
-    Set up to deal with polesia region 
+    Set up to deal with Polesia region 
     
     TODO update the increments in the linspace range to deal with inputs of any shape - current workaround, try different levels until able to download 
     """
@@ -246,28 +340,30 @@ def pull_monthly_cloudless_sentinel(years,outdir, coords =( 50.77946266, 53.0444
             tile = label
 
             b3_file_name = os.path.join(outdir, str(d) + '_' + str(tile) +'_B03.tif' )
-            b4_file_name = os.path.join(outdir, str(d) + '_'  + str(tile) +'_B04.tif' )
+            b11_file_name = os.path.join(outdir, str(d) + '_'  + str(tile) +'_B11.tif' )
             b8_file_name = os.path.join(outdir, str(d) + '_'  + str(tile) +'_B08.tif' )
 
 
-            if (os.path.exists(b3_file_name) is False  and os.path.exists(b8_file_name) is False):
+            if (os.path.exists(b3_file_name) is False and os.path.exists(b8_file_name) is False and os.path.exists(b11_file_name) is False):
+                
                 print('Starting {}'.format(d) )
                 print('Creating median image')
+                
                 comp_image = pull_composite_image(s, e, AOI)
                
                 if comp_image is not None:
                     print('Normalizing bands')
                     b8 = comp_image.select('B8').divide(max_val)
                     b3 = comp_image.select('B3').divide(max_val)
-#                     b4 = comp_image.select('B4').divide(max_val)
+                    b11 = comp_image.select('B11').divide(max_val)
 
                     if os.path.exists(b3_file_name) is False:
                         print('Exporting B3 data!')
                         geemap.ee_export_image( b3, filename= b3_file_name, scale = scale, region=AOI)
 
-#                     if os.path.exists(b4_file_name) is False:
-#                         print('Exporting B4 data!')
-#                         geemap.ee_export_image( b4, filename= b4_file_name ,scale = scale, region=AOI)
+                    if os.path.exists(b11_file_name) is False:
+                        print('Exporting B11 data!')
+                        geemap.ee_export_image( b11, filename= b11_file_name ,scale = scale, region=AOI)
 
                     if os.path.exists(b8_file_name) is False:
                         print('Exporting B8 data!')
@@ -275,13 +371,132 @@ def pull_monthly_cloudless_sentinel(years,outdir, coords =( 50.77946266, 53.0444
 
                     print('Data exported!')
     return
-      
-if __name__ == '__main__':
-    years = [2017, 2018,2019, 2020]
-    outdir = r'/gws/nopw/j04/bas_climate/projects/WildfireDistribution/cloudless'
+
+def clean_sentinel_folder(path, bad_path):
+    """
+    This function cleans up a folder to remove any date/tile combos that do not have all three bands- some are missing from GEE. 
+    Needed to sample successfully in Torch Lightning. 
+    Note this only works on folders containing only the bands noted below - run manual clean up on any other bands e.b. rm *B04.tif 
+    TODO: update to deal with multiple bands 
     
-    if os.path.isdir(outdir) is False:
-        os.mkdir(outdir)
-        
-    for y in years:
-        pull_monthly_cloudless_sentinel(y, outdir)
+    Inputs: 
+    
+    path: path of folder to clean 
+    
+    bad_path: where to move files that dont have all three files 
+    
+    """
+    filename_regex = '^(?P<date>\\d{6})_(?P<tile>\\d{1,2})_(?P<band>B[018][\\dA]).tif$'
+    filename_glob = '*B0*.tif'
+
+    list_bands = ['B03', 'B08', 'B11']
+    list_files= os.listdir(path)
+    
+    good = [] 
+    date_tile_list = [] 
+    
+    for filename in list_files:
+        dt = filename[0:9]
+        date_tile_list.append(dt)
+
+    for dt in date_tile_list:
+        check = [s for s in list_files if dt in s]
+        check = list(dict.fromkeys(check))
+        if len(check) >= 3:
+            good.append(dt)
+
+    if os.path.isdir(bad_path) is False:
+        os.mkdir(bad_path)
+
+    for filename in list_files:
+        dt = filename[0:9]
+        if dt not in good:
+            print('bad files ' + filename)
+            shutil.move(os.path.join(path, filename) , os.path.join( bad_path, filename ) )
+
+
+def unzip_all_modis_fire_files(output_path):
+    """
+    Function pulls all modis fire data from CEDA archive within Jasmin from 2001 - 2020 and unzips it into output folder. 
+    Deals with different file structure for 2019 and 2007 folders.
+    
+    Inputs:
+    output_path = path for unzipped files to be stored e.g. '/home/users/graceebc/MODIS/'
+    """
+    print("Pulling and unzipping the MODIS files, start()... ")
+    print("Check output directory..")
+
+    # Check path exists
+    if os.path.isdir(output_path) is False:
+        os.makedirs(output_path)
+
+    # Check that annual folders exist also
+    for year in range(2001, 2021):
+        if os.path.isdir(output_path + str(year) + "/") is False:
+            os.makedirs(output_path + str(year) + "/")
+
+    print("Output directory ready.")
+    print("Creating list of files to pulll..")
+
+    # Access all files and unzip - need to treat 2007 and 2019 differently as there was restated data
+    year_list = [x for x in range(2001, 2021) if (x != 2007 and x != 2019)]
+    months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+
+    # Create list of files - 2007 has different folder structure + 2019
+    file_part1 = [
+        "/neodc/esacci/fire/data/burned_area/MODIS/pixel/v5.1/compressed/{0}/{0}{1}01-ESACCI-L3S_FIRE-BA-MODIS-AREA_3-fv5.1.tar.gz".format(
+            year, month
+        )
+        for year in year_list
+        for month in months
+    ]
+    file_part2 = [
+        "/neodc/esacci/fire/data/burned_area/MODIS/pixel/v5.1/compressed/2007/new-corrected/2007{0}01-ESACCI-L3S_FIRE-BA-MODIS-AREA_3-fv5.1.tar.gz".format(
+            month
+        )
+        for month in months
+    ]
+    file_part3 = [
+        "/neodc/esacci/fire/data/burned_area/MODIS/pixel/v5.1/compressed/2019/2019{0}01-ESACCI-L3S_FIRE-BA-MODIS-AREA_3-fv5.1.tar.gz".format(
+            month
+        )
+        for month in months[:9]
+    ]
+    file_part4 = [
+        "/neodc/esacci/fire/data/burned_area/MODIS/pixel/v5.1/compressed/2019/new-corrected/2019{0}01-ESACCI-L3S_FIRE-BA-MODIS-AREA_3-fv5.1.tar.gz".format(
+            month
+        )
+        for month in months[-3:]
+    ]
+    files = file_part1 + file_part2 + file_part3 + file_part4
+    print("List of files created.")
+
+    print("Start unzipping files..")
+    for file_name in files:
+
+        try:
+            dat = dateutil.parser.parse(
+                str(file_name[68:80].replace("/", " ")), fuzzy="yes"
+            )
+            name = dat.strftime("%Y%m%d")
+
+        except:
+            dat = dateutil.parser.parse(
+                str(file_name[80:95].replace("/", " ")), fuzzy="yes"
+            )
+            name = dat.strftime("%Y%m%d")
+        file_id = "{0}-ESACCI-L3S_FIRE-BA-MODIS-AREA_3-fv5.1-LC.tif".format(name)
+        year = name[:4]
+
+        # check if file already unzipped
+        if file_id not in os.listdir(output_path + year + "/"):
+
+            # Open file
+            file = tarfile.open(file_name)
+
+            # Extracting file
+            file.extractall(output_path + year + "/")
+
+            file.close()
+
+    print("Unzipped all MODIS files, bye!")

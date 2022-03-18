@@ -74,6 +74,53 @@ As proxies for these two indices can be adapted from specific spectral bands in 
 - how to set up the environment with the config file
 - how to run the train script from the command line
 
+## Dataset Information and Accessing Data
+There are four data sets used in this repository. 
+
+**Polesia Landcover mapping** was generated using the following open-access mapping repository:
+[https://github.com/tpfd/Polesia-Landcover](https://github.com/tpfd/Polesia-Landcover])
+
+
+This generates both a ’simple’ and ’complex’ landcover mapping, with the former splitting out 9 categories of landcover, and the latter 13. You can download the classified tiles directly: 
+
+[Download Polesia Landcover Data ](https://github.com/graceebc9/Fire_data/tree/main/Classified)
+
+
+**MODIS Burned Area**, our ground truth, is provided by ESA, and contains burned area and confidence level information on a per-pixel basis, derived from MODIS satelllite. The dataset is comprised of separate monthly files. We select Area 3 as it covers the Polesia region. 
+
+The pre-processing of the dataset is done within our custom TorchGeo ’MODIS’ Class and consists of the following:
+(a) Binarize We covert the numeric Julian day of burn into a binary value of: ‘0’ for no burn or ‘1’ for burn observed within a given month
+
+**Sentinel 2 Spectral Reflectance** is provided by ESA, and consists of the bands 3, 8 and 11, as would make up the NDWI and NDVI indices. 
+
+To download Sentinel-2 and MODIS data on JASMIN HPC, **run the download_data.py script in the src/data_loading folder.**
+
+__ Data to be downloaded:
+ - MODIS Burned area product for years 2000-2020. This method will pull from Jasmin storage, and unzip files to location specified in modis output variable.
+ - 3 bands of Sentinel 2 data: B3, B8 and B11, rolled up to monthly level and normalised to within 0-1. This method will download years 2017-2020. Each band downloads to seperate file. The Polesia region is split into 87 tiles to enable download.
+
+ Requirements:
+ 
+ - Create environment using the data_envs.yml file
+ - Authenticate Earth enginge account in this environemnt - https://developers.google.com/earth-engine/guides/python_install
+-  This script is designed to be run on JASMIN HPC - the Sentinel portion will work locally but the MODIS unzip will not. Modis data can also be accessed freely via the CEDA archive._
+
+**ERA 5**
+
+The ERA 5 indices at monthly cadence for Polesia region were provided to us by Martin Rogers (BAS).
+ 
+(a) Temperature 2m above land surface
+(b) Snow Cover
+(c) Snow Depth
+(d) Volumetric Soil Water
+
+The data for the four indices mentioned above, and the scripts used to create them, can be downloaded from the following repository:
+
+[Download ERA 5 ](https://github.com/graceebc9/Fire_data/tree/main/ERA5)
+
+
+
+
 ## Example usage
 
 - show some plots of results
