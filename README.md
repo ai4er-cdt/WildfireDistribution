@@ -29,7 +29,7 @@ This dataset was processed into monthly batches and each pixel was assigned a bu
 ![Burn Coverage Polesia](report/figures/ModisBurnPlot_2020.png?raw=true "Burn Plot for March 2020 with burnt and unburnt apparent")
 *Figure 2 - Simplified plot of MODIS-derived Fire_CCI51 dataset, with burnt and unburnt areas apparent for March 2020.*
 
-The pre-processing of the dataset is done within our custom TorchGeo ‘MODIS’ Class and consists of the following: Binarize We convert the numeric Julian day of burn into a binary value of: ‘0’ for no burn or ‘1’ for burn observed within a given month.
+The pre-processing of this dataset was carried out within our custom TorchGeo ‘MODIS’ Class and consisted of the following: Binarize - We convert the numeric Julian day of burn into a binary value of: ‘0’ for no burn or ‘1’ for burn observed within a given month.
 
 ### 3.2 - Predictor Datasets
 **3.2.1 - Landcover Types (Sentinel-2+Classifier)**
@@ -68,22 +68,18 @@ As proxies for these two indices can be adapted from specific spectral bands in 
 
 To download Sentinel-2 and MODIS data on the JASMIN HPC, **run the download_data.py script in the src/data_loading folder.**
 
-Data to be downloaded:
+### 3.3 - Data to Download
 
  - MODIS Burned area product for years 2000-2020. This method will pull from Jasmin storage, and unzip files to location specified in modis output variable.
 
- - 3 bands of Sentinel 2 data: B3, B8 and B11, rolled up to monthly level and normalised to within 0-1. This method will download years 2017-2020. Each band downloads to seperate file. The Polesia region is split into 87 tiles to enable download.
+ - Three bands of Sentinel 2 data: B3, B8 and B11, rolled up to monthly level and normalised to within 0-1. This method will download years 2017-2020. Each band downloads to seperate file. The Polesia region is split into 87 tiles to enable download.
 
-Requirements:
-
+## 4.0 - Requirements
  - Create environment using the data_envs.yml file
 
  - Authenticate Earth enginge account in this environemnt - https://developers.google.com/earth-engine/guides/python_install
 
 -  This script is designed to be run on JASMIN HPC - the Sentinel portion will work locally but the MODIS unzip will not. Modis data can also be accessed freely via the CEDA archive._
-
-## 4.0 - Requirements
-- Python 3.9+
 
 ## Getting started/installation
 
