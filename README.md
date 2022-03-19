@@ -139,7 +139,7 @@ The data for the four indices mentioned above, and the scripts used to create th
 
 ## 6.0 - Contributors & Organisations
 
-### Contributors
+### 6.1 - Contributors
 Project Core Members:
 
 - Campbell, Hamish. *(AI4ER Cohort-2021, University of Cambridge)*[<img align="right" src=report/figures/logos/GitHub-Mark.png width=30px>](https://github.com/Hamish-Cam)[<img align="right" src=report/figures/logos/AI4ER.png width=25px>](https://ai4er-cdt.esc.cam.ac.uk/StaffDirectory/students-all/2021-students)
@@ -160,7 +160,7 @@ Domain Support Members:
 
 - Ashton-Butt, Adham. *(British Trust for Ornithology (BTO))*[<img align="right" src=report/figures/logos/bto_logo.png width=25>](https://www.bto.org/about-bto/our-staff/adham-ashton-butt)
 
-### Organisations
+### 6.2 - Organisations
 
 University of Cambridge:
 - AI for the study of Environmental Risks (AI4ER), UKRI Centre for Doctoral Training, Cambridge.[<img align="right" src=report/figures/logos/AI4ER.png width=25px>](https://ai4er-cdt.esc.cam.ac.uk/)
@@ -171,7 +171,7 @@ AI4EO Initiative of ESA's Φ-Lab
 AI4EO Partner:
 - British Trust for Ornithology (BTO), Norfolk.[<img align="right" src=report/figures/logos/bto_logo.png width=25px>](https://www.bto.org/)
 
-## References
+## 7.0 - References
 
 OSM. (2022) 'Map of Europe' Available at: https://www.openstreetmap.org/about (Accessed: 14 March 2022)
 
