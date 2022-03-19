@@ -25,11 +25,9 @@ To narrow the geospatial bounds of the project, a study area was defined which e
 ## 3.0 - Data
 ### 3.1 - Target Dataset
 As directed by partners of this project, the target dataset used was the ['Fire_cci Burned Area dataset'](https://geogra.uah.es/fire_cci/firecci51.php) as generated and served by the ESA. This dataset was originally derived from spectral band data from [MODIS](https://lpdaac.usgs.gov/products/mod09gqv006/) alongside thermal data from [MODIS active fire products](https://modis-fire.umd.edu/index.html). 
-This dataset was processed into monthly batches and each pixel was assigned a burn/no-burn value (We convert the 'numeric Julian day' of burn into a binary value) (See Figure 2); this target dataset provided a necessary ground truth with which to iteratively improve the NN's performance when processing the predictor datasets. Area 3 was selected as it covers the Polesia region.
+This dataset was processed into monthly batches and each pixel was assigned a burn/no-burn value  (See Figure 2); this target dataset provided a necessary ground truth with which to iteratively improve the NN's performance when processing the predictor datasets. Area 3 was selected as it covers the Polesia region.
 ![Burn Coverage Polesia](report/figures/ModisBurnPlot_2020.png?raw=true "Burn Plot for March 2020 with burnt and unburnt apparent")
 *Figure 2 - Simplified plot of MODIS-derived Fire_CCI51 dataset, with burnt and unburnt areas apparent for March 2020.*
-
-The pre-processing of this dataset was carried out within our custom TorchGeo ‘MODIS’ Class and consisted of the following: Binarize - We convert the numeric Julian day of burn into a binary value of: ‘0’ for no burn or ‘1’ for burn observed within a given month.
 
 ### 3.2 - Predictor Datasets
 **3.2.1 - Landcover Types (Sentinel-2+Classifier)**
@@ -37,7 +35,6 @@ The pre-processing of this dataset was carried out within our custom TorchGeo �
 Based on previous work commissioned by the BTO, a 'google earth engine' based land cover classifier built by [Artio Earth Observation LLP](https://find-and-update.company-information.service.gov.uk/company/OC437578) was made available to this project via a public [github page](https://github.com/tpfd/Polesia-Landcover). This classifier was based on a random forest (RF) classification algorithm which had been pre-trained for a sub-region of Polesia (See Figure 1). By using this algorithm on satellite imagery gathered by [Sentinel 2](https://sentinels.copernicus.eu/web/sentinel/sentinel-data-access), a full landcover map of the entire project area was generated (classifying pixels into one of nine simple landcover types) with a maximum spatial resolution of 20m (See Figure 3).
 ![Land Cover Polesia](report/figures/SimpleLandCoverMosaic_2018.png?raw=true "Land cover generated for Polesia")
 *Figure 3 - Land cover map for 2018 generated using the RF algorithm in combination with Sentinel satellite imagery.*
-In addition to the simple landcover classification method which only uses the 9 classes, a complex classification technique can be deployed which yields 13. Classified tiles can be downloaded directly from [this](https://github.com/graceebc9/Fire_data/tree/main/Classified) GitHub repository
 
 **3.2.2 - Snow Cover/Depth, Soil Moisture, Surface Temperature (ERA5)**
 
@@ -66,76 +63,44 @@ As proxies for these two indices can be adapted from specific spectral bands in 
 ![NDWI 2020 Polesia](report/figures/ndwi_2020.png?raw=true "Sentinel NDWI data generated from bands for 2020.")
 *Figure 8 - NDWI data generated from raw Sentinel-2 multispectral band data. A strip of cloud cover is seen on the left hand side of the image as well as a patch on the right.*
 
-To download Sentinel-2 and MODIS data on the JASMIN HPC, **run the download_data.py script in the src/data_loading folder.**
+## 4.0 - Data Access
+As noted above, four datasets were used in this repository. 
 
-### 3.3 - Data to Download
-
- - MODIS Burned area product for years 2000-2020. This method will pull from Jasmin storage, and unzip files to location specified in modis output variable.
-
- - Three bands of Sentinel 2 data: B3, B8 and B11, rolled up to monthly level and normalised to within 0-1. This method will download years 2017-2020. Each band downloads to seperate file. The Polesia region is split into 87 tiles to enable download.
-
-## 4.0 - Requirements
- - Create environment using the data_envs.yml file
-
- - Authenticate Earth enginge account in this environemnt - https://developers.google.com/earth-engine/guides/python_install
-
--  This script is designed to be run on JASMIN HPC - the Sentinel portion will work locally but the MODIS unzip will not. Modis data can also be accessed freely via the CEDA archive._
-
-## Getting started/installation
-
-- how to set up the environment with the config file
-- how to run the train script from the command line
-
-## Dataset Information and Accessing Data
-There are four data sets used in this repository. 
-
-**Polesia Landcover mapping** was generated using the following open-access mapping repository:
+### 4.1 - Polesia Landcover
+Polesia Landcover mapping was generated using the following open-access mapping repository:
 [https://github.com/tpfd/Polesia-Landcover](https://github.com/tpfd/Polesia-Landcover])
 
+This generates both a ’simple’ and ’complex’ landcover mapping, with the former splitting out 9 categories of landcover, and the latter 13. Classified tiles can be downloaded at [this](https://github.com/graceebc9/Fire_data/tree/main/Classified) GitHub repository.
 
-This generates both a ’simple’ and ’complex’ landcover mapping, with the former splitting out 9 categories of landcover, and the latter 13. You can download the classified tiles directly: 
+### 4.2 MODIS Burned Area
+MODIS Burned Area, our ground truth, is provided by ESA, and contains burned area and confidence level information on a per-pixel basis, derived from MODIS satelllite. The dataset is comprised of separate monthly files. We select Area 3 as it covers the Polesia region. The pre-processing of the dataset is done within our custom TorchGeo ’MODIS’ Class and consists of the following: Binarize - We covert the numeric Julian day of burn into a binary value of: ‘0’ for no burn or ‘1’ for burn observed within a given month
 
-[Download Polesia Landcover Data ](https://github.com/graceebc9/Fire_data/tree/main/Classified)
-
-
-**MODIS Burned Area**, our ground truth, is provided by ESA, and contains burned area and confidence level information on a per-pixel basis, derived from MODIS satelllite. The dataset is comprised of separate monthly files. We select Area 3 as it covers the Polesia region. 
-
-The pre-processing of the dataset is done within our custom TorchGeo ’MODIS’ Class and consists of the following:
-(a) Binarize We covert the numeric Julian day of burn into a binary value of: ‘0’ for no burn or ‘1’ for burn observed within a given month
-
-**Sentinel 2 Spectral Reflectance** is provided by ESA, and consists of the bands 3, 8 and 11, as would make up the NDWI and NDVI indices. 
+### 4.3 - Sentinel-2 Spectral Reflectance
+Sentinel 2 Spectral Reflectance is provided by ESA, and consists of the bands 3, 8 and 11, as would make up the NDWI and NDVI indices. 
 
 To download Sentinel-2 and MODIS data on JASMIN HPC, **run the download_data.py script in the src/data_loading folder.**
 
-__ Data to be downloaded:
+#### Data to be downloaded:
  - MODIS Burned area product for years 2000-2020. This method will pull from Jasmin storage, and unzip files to location specified in modis output variable.
  - 3 bands of Sentinel 2 data: B3, B8 and B11, rolled up to monthly level and normalised to within 0-1. This method will download years 2017-2020. Each band downloads to seperate file. The Polesia region is split into 87 tiles to enable download.
 
- Requirements:
- 
+#### Requirements:
  - Create environment using the data_envs.yml file
  - Authenticate Earth enginge account in this environemnt - https://developers.google.com/earth-engine/guides/python_install
 -  This script is designed to be run on JASMIN HPC - the Sentinel portion will work locally but the MODIS unzip will not. Modis data can also be accessed freely via the CEDA archive._
 
-**ERA 5**
+### 4.4 - ERA5
+The ERA 5 indices at monthly resolution for the Polesia region were provided to us by Martin Rogers (BAS).
 
-The ERA 5 indices at monthly cadence for Polesia region were provided to us by Martin Rogers (BAS).
- 
 (a) Temperature 2m above land surface
+
 (b) Snow Cover
+
 (c) Snow Depth
+
 (d) Volumetric Soil Water
 
-The data for the four indices mentioned above, and the scripts used to create them, can be downloaded from the following repository:
-
-[Download ERA 5 ](https://github.com/graceebc9/Fire_data/tree/main/ERA5)
-
-
-
-
-## Example usage
-
-- show some plots of results
+The data for the four indices mentioned above, and the scripts used to create them, can be downloaded at [this](https://github.com/graceebc9/Fire_data/tree/main/ERA5) GitHub repository.
 
 ## Project Organization
 ```
