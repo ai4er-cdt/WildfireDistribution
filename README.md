@@ -102,7 +102,7 @@ The ERA 5 indices at monthly resolution for the Polesia region were provided to 
 
 The data for the four indices mentioned above, and the scripts used to create them, can be downloaded at [this](https://github.com/graceebc9/Fire_data/tree/main/ERA5) GitHub repository.
 
-## Project Organization
+## 5.0 - Project Organization
 ```
 ├── LICENSE
 ├── Makefile           <- Makefile with commands like `make init` or `make lint-requirements`
@@ -137,12 +137,7 @@ The data for the four indices mentioned above, and the scripts used to create th
 └── setup.cfg          <- setup configuration file for linting rules
 ```
 
-## Code formatting
-To automatically format your code, make sure you have `black` installed (`pip install black`) and call
-```black . ``` 
-from within the project directory.
-
-## Contributors & Organisations
+## 6.0 - Contributors & Organisations
 
 ### Contributors
 Project Core Members:
