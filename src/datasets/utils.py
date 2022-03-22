@@ -151,7 +151,8 @@ def add_shadow_bands(img, NIR_DRK_THRESH, CLD_PRJ_DIST):
     """
     # Identify water pixels from the SCL band.
     not_water = img.select('SCL').neq(6)
-
+    
+   
     # Identify dark NIR pixels that are not water (potential cloud shadow pixels).
     SR_BAND_SCALE = 1e4
     dark_pixels = img.select('B8').lt(NIR_DRK_THRESH*SR_BAND_SCALE).multiply(not_water).rename('dark_pixels')
