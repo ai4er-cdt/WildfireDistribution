@@ -146,7 +146,8 @@ def add_cloud_bands(img, CLD_PRB_THRESH):
 
 
 def add_shadow_bands(img, NIR_DRK_THRESH, CLD_PRJ_DIST):
-        """Function taken from https://developers.google.com/earth-engine/tutorials/community/sentinel-2-s2cloudless
+    """
+    Function taken from https://developers.google.com/earth-engine/tutorials/community/sentinel-2-s2cloudless
     """
     # Identify water pixels from the SCL band.
     not_water = img.select('SCL').neq(6)
@@ -173,7 +174,7 @@ def add_shadow_bands(img, NIR_DRK_THRESH, CLD_PRJ_DIST):
 
 
 def add_cld_shdw_mask(img):
-        """Function taken from https://developers.google.com/earth-engine/tutorials/community/sentinel-2-s2cloudless
+    """Function taken from https://developers.google.com/earth-engine/tutorials/community/sentinel-2-s2cloudless
     """
     CLD_PRB_THRESH = 40
     NIR_DRK_THRESH =0.15
@@ -198,7 +199,7 @@ def add_cld_shdw_mask(img):
     return img_cloud_shadow.addBands(is_cld_shdw)
 
 def apply_cld_shdw_mask(img):
-        """Function taken from https://developers.google.com/earth-engine/tutorials/community/sentinel-2-s2cloudless
+    """Function taken from https://developers.google.com/earth-engine/tutorials/community/sentinel-2-s2cloudless
     """
     # Subset the cloudmask band and invert it so clouds/shadow are 0, else 1.
     not_cld_shdw = img.select('cloudmask').Not()
