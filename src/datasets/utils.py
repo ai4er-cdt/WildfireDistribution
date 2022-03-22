@@ -9,8 +9,6 @@ import os
 import numpy as np
 import tarfile
 import dateutil
-
-
 import glob
 import re
 import shutil
@@ -157,10 +155,10 @@ def add_shadow_bands(img):
 
     # Project shadows from clouds for the distance specified by the CLD_PRJ_DIST input.
     cld_proj = (img.select('clouds').directionalDistanceTransform(shadow_azimuth, CLD_PRJ_DIST*10)
-        .reproject(**{'crs': img.select(0).projection(), 'scale': 100})
-        .select('distance')
-        .mask()
-        .rename('cloud_transform'))
+                .reproject(**{'crs': img.select(0).projection(), 'scale': 100})
+                .select('distance')
+                .mask()
+                .rename('cloud_transform'))
 
     # Identify the intersection of dark pixels with cloud shadow projection.
     shadows = cld_proj.multiply(dark_pixels).rename('shadows')
@@ -207,20 +205,20 @@ def pull_composite_image(START_DATE, END_DATE, AOI):
     """
     Pulls composite image from google earth enginge, based on these standard levels given by google cloud development script,   
     https://developers.google.com/earth-engine/tutorials/community/sentinel-2-s2cloudless
-    
+
     Inputs:
     Start_date: start of time period in format YYYY-MM-DD
     End date: end of time period in format YYY-MM-DD
     AOI: ee geometry object (e.g. polygon) than defines area of interest to pull data for 
     """
     CLOUD_FILTER = 60
-    
+
     NIR_DRK_THRESH = 0.15
     CLD_PRJ_DIST = 2
     BUFFER = 100
-    
+
     s2_sr_cld_col = get_s2_sr_cld_col(AOI, START_DATE, END_DATE, CLOUD_FILTER)
-    
+
     s2_sr_median = (s2_sr_cld_col.map(add_cld_shdw_mask)
                              .map(apply_cld_shdw_mask)
                              .median())
@@ -230,23 +228,23 @@ def create_monthly_start_end_dates(years, months):
     """
     Generate three lists: start_date, end_date and date_list to pull sentinel data in a monthly manner with start and end date, 
     using date_list to label the monthly composite files. uses 30th as EOM
-    
+
     TO DO update to include 31st
-    
+
     Inputs:
-    
+
     years: list of years you want to iterate over 
     months: months in the year to iterate over 
     """
-    
+
     start_list = [] 
     end_list = [] 
     date_list = []
-    
+
     for y in years:
         for m in months: 
             start = datetime.date( y, m, 1) 
-            
+
             if m == 2:
                 end = datetime.date( y, m, 28)
             if m!= 2:
@@ -259,9 +257,9 @@ def create_monthly_start_end_dates(years, months):
             start_list.append(start_date)
             end_list.append(end_date) 
             date_list.append(date)
-        
+
         return start_list, end_list, date_list 
-    
+
 
 def pairwise(iterable):
     """Returns set of pairs from list- iterated over in order 
@@ -278,7 +276,7 @@ def create_latlon_grid(minlat  = 50.77946266, maxlat=  53.04445373, minlon= 22.9
     """
     Create list of polygon geometry objects to iterate over with in earth engine in order to not overload memory. 
     Set up to deal with Polesia region 
-    
+
     TODO update the increments in the linspace range to deal with inputs of any shape - current workaround, try different levels until able to download 
     """
     lon_range =  np.linspace(minlon, maxlon, 30) 
@@ -287,9 +285,9 @@ def create_latlon_grid(minlat  = 50.77946266, maxlat=  53.04445373, minlon= 22.9
 
     geom_list= []
     geom_labels=[]
-    
+
     i=1
-    
+
     for lower, upper in pairwise(lon_range):
         for x_low, x_up in pairwise(lat_range):
 
