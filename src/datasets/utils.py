@@ -132,7 +132,8 @@ def get_s2_sr_cld_col(aoi, start_date, end_date, CLOUD_FILTER):
     }))
 
 def add_cloud_bands(img, CLD_PRB_THRESH):
-        """Function taken from https://developers.google.com/earth-engine/tutorials/community/sentinel-2-s2cloudless
+    """
+    Function taken from https://developers.google.com/earth-engine/tutorials/community/sentinel-2-s2cloudless
     """
     # Get s2cloudless image, subset the probability band.
     cld_prb = ee.Image(img.get('s2cloudless')).select('probability')
