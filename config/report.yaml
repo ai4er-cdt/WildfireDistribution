@@ -2,6 +2,9 @@
 #   CONFIGURATIONS FOR BINARY SEGMENTATION TASK WITH UNET 
 ################################################################################
 
+program:
+    seed: 12
+
 datamodule:
     modis_root_dir: "/gws/nopw/j04/bas_climate/projects/WildfireDistribution/modis_fire/test_fire/"
     landcover_root_dir: "/gws/nopw/j04/bas_climate/projects/WildfireDistribution/Classified/"
@@ -15,7 +18,7 @@ datamodule:
 module: 
     segmentation_model: "unet"
     encoder_name: "resnet18"
-    encoder_weights: None
+    encoder_weights: null
     in_channels: 4
     num_classes: 2
     num_filters: 32
@@ -26,10 +29,13 @@ module:
 
 trainer: 
     default_root_dir: "experiments/"
+    fast_dev_run: False
     gpus: 1
     max_epochs: 100
-    # logger: wandb_logger,
     log_every_n_steps: 50
-    # callbacks: callbacks
     precision: 16
     auto_lr_find: True
+
+logger: 
+    run_name: "auto_lr_batch_16_len_2048_burn_prop_1.0"
+    log_dir: "experiments/logs/"

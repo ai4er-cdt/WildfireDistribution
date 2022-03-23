@@ -1,3 +1,14 @@
+"""
+Description: Runs binary segmentation experiment
+
+Usage: train.py [options] --cfg=<path_to_config> 
+
+Options:
+  --cfg=<path_to_config>           Path to YAML configuration file to use.
+  
+"""
+
+
 import os
 import yaml
 from docopt import docopt
@@ -58,8 +69,8 @@ def main(conf):
     wandb_logger = WandbLogger(
         project="GTC",
         log_model="all",
-        name="auto_lr_batch_16_len_2048_burn_prop_1.0",
-        save_dir="/gws/nopw/j04/bas_climate/projects/WildfireDistribution/wandb/",
+        name=conf["logger"]["run_name"],
+        save_dir=conf["logger"]["log_dir"],
     )
 
     callbacks = [
@@ -77,6 +88,7 @@ def main(conf):
     trainer = Trainer(
         logger=wandb_logger,
         callbacks=callbacks,
+        fast_dev_run=conf["trainer"]["fast_dev_run"],
         default_root_dir=conf["trainer"]["default_root_dir"],
         gpus=conf["trainer"]["gpus"],
         max_epochs=conf["trainer"]["max_epochs"],
@@ -103,7 +115,7 @@ if __name__ == "__main__":
         cfg = yaml.safe_load(f)
 
     # set random seed for reproducibility
-    pl.seed_everything(12)
+    pl.seed_everything(cfg["program"]["seed"])
 
     # TRAIN
     main(cfg)
