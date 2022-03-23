@@ -4,7 +4,7 @@
 """Landsat datasets."""
 
 import abc
-from torchgeo.datasets.geo import Landsat
+from torchgeo.datasets import Landsat
 from typing import Any, Callable, Dict, List, Optional, Sequence
 
 from rasterio.crs import CRS
