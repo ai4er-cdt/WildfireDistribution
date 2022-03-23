@@ -1,4 +1,4 @@
-from ..data_loading import MODIS_JD, LandcoverSimple, Landsat7
+from ..datasets import MODIS_JD, LandcoverSimple, Landsat7
 
 from typing import Any, Dict, Optional
 
