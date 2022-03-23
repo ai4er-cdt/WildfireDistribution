@@ -9,6 +9,14 @@
  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 
+## Usage 
+
+To run the experiment used to generate figures in the report:
+
+```bash
+$ python train.py --cfg=config/report.yaml 
+```
+
 ## 1.0 - Background
 In late 2021, one of Cambridge's EPSRC-funded centre for doctoral training (CDT) programs by the name of 'AI for the study of environmental risks' (AI4ER) launched a group team challenge (GTC) amongst it's cohort of 2021. The cohort was split down the middle into two groups of 4, with one tasked with building a neural net (NN) capable of categorising ice and open water in the Antarctic's Bellinhausen Sea ('Ice Group'), whilst the other looked to create a NN able to predict wildfire in the eastern European region of Polesia ('Fire Group'). Both of these projects were begun in December 2021 and due to end by March 2022.
 
@@ -85,7 +93,22 @@ To download Sentinel-2 and MODIS data on JASMIN HPC, **run the download_data.py 
  - 3 bands of Sentinel 2 data: B3, B8 and B11, rolled up to monthly level and normalised to within 0-1. This method will download years 2017-2020. Each band downloads to seperate file. The Polesia region is split into 87 tiles to enable download.
 
 #### Requirements:
- - Create environment using the data_envs.yml file
+
+To create and activate environment necessary for data download and processing:
+```bash
+$ conda env create -f data_envs.yml -n dataenv 
+$ conda activate dataenv
+$ (dataenv)
+```
+
+To create and activate environment necessary to train the model:
+
+```bash
+$ conda env create -f environment.yml -n modelenv 
+$ conda activate modelenv
+$ (modelenv)
+```
+
  - Authenticate Earth enginge account in this environemnt - https://developers.google.com/earth-engine/guides/python_install
 -  This script is designed to be run on JASMIN HPC - the Sentinel portion will work locally but the MODIS unzip will not. Modis data can also be accessed freely via the CEDA archive._
 
