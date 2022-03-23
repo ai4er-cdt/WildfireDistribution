@@ -1,18 +1,31 @@
+"""
+Description: Runs binary segmentation experiment
+
+Usage: train.py [options] --cfg=<path_to_config> 
+
+Options:
+  --cfg=<path_to_config>           Path to YAML configuration file to use.
+  
+"""
+
+
 import os
+import yaml
+from docopt import docopt
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning import Trainer
 from src.datamodules import MODISJDLandcoverSimpleDataModule
-# from torchgeo.trainers import SemanticSegmentationTask
-from src.tasks import SemanticSegmentationTask # use this when overfitting/debuging 
 
+# from torchgeo.trainers import SemanticSegmentationTask
+from src.tasks import SemanticSegmentationTask  # use this when overfitting/debuging
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from src.evaluation import LogPredictionsCallback
 
 from torchgeo.datasets import BoundingBox
 
 
-# use this for debugging outputs with a single sample
+# use this for debugging outputs with a single sample
 TEST_OVERFIT = [
     BoundingBox(
         minx=27.108280665817976,
@@ -20,89 +33,89 @@ TEST_OVERFIT = [
         miny=51.56347697151736,
         maxy=51.61018936629158,
         mint=1543622399.999999,
-        maxt=1543622399.999999),
+        maxt=1543622399.999999,
+    ),
 ]
 
 
-def main():
-    
+def main(conf):
+
     datamodule = MODISJDLandcoverSimpleDataModule(
-        modis_root_dir="/gws/nopw/j04/bas_climate/projects/WildfireDistribution/modis_fire/test_fire/",
-        landcover_root_dir="/gws/nopw/j04/bas_climate/projects/WildfireDistribution/Classified/",
-        sentinel_root_dir="/gws/nopw/j04/bas_climate/projects/WildfireDistribution/cloudless/",
-        patch_size=256,
-        length=2048, #256, #8481,
-        batch_size=16,
-        num_workers=0,
-        balance_samples=True,
-        burn_prop=1.0,
+        modis_root_dir=conf["datamodule"]["modis_root_dir"],
+        landcover_root_dir=conf["datamodule"]["landcover_root_dir"],
+        sentinel_root_dir=conf["datamodule"]["sentinel_root_dir"],
+        patch_size=conf["datamodule"]["patch_size"],
+        length=conf["datamodule"]["length"],
+        batch_size=conf["datamodule"]["batch_size"],
+        num_workers=conf["datamodule"]["num_workers"],
+        balance_samples=conf["datamodule"]["balance_samples"],
     )
-    
+
     model = SemanticSegmentationTask(
-        segmentation_model="unet",
-        encoder_name="resnet18",
-        encoder_weights=None,
-        in_channels=4,
-        num_classes=2,
-        num_filters=32,
-        loss="ce",
-        ignore_zeros=True, 
-        learning_rate=0.0001,
-        learning_rate_schedule_patience=5,
+        segmentation_model=conf["module"]["segmentation_model"],
+        encoder_name=conf["module"]["encoder_name"],
+        encoder_weights=conf["module"]["encoder_weights"],
+        in_channels=conf["module"]["in_channels"],
+        num_classes=conf["module"]["num_classes"],
+        num_filters=conf["module"]["num_filters"],
+        loss=conf["module"]["loss"],
+        ignore_zeros=conf["module"]["ignore_zeros"],
+        learning_rate=conf["module"]["learning_rate"],
+        learning_rate_schedule_patience=conf["module"][
+            "learning_rate_schedule_patience"
+        ],
     )
-    
-    
+
     wandb_logger = WandbLogger(
         project="GTC",
         log_model="all",
-        name="auto_lr_batch_16_len_2048_burn_prop_1.0",
-        # name="test_logging",
-        save_dir="/gws/nopw/j04/bas_climate/projects/WildfireDistribution/wandb/",
+        name=conf["logger"]["run_name"],
+        save_dir=conf["logger"]["log_dir"],
     )
-    
+
     callbacks = [
         LogPredictionsCallback(),
         ModelCheckpoint(monitor="val_loss", mode="max"),
         ModelCheckpoint(monitor="train_Accuracy", mode="max"),
         ModelCheckpoint(monitor="val_Accuracy", mode="max"),
-        EarlyStopping(monitor="val_loss", min_delta=0.00, patience=3,),
+        EarlyStopping(
+            monitor="val_loss",
+            min_delta=0.00,
+            patience=3,
+        ),
     ]
-    
+
     trainer = Trainer(
-        default_root_dir="experiments/",
-        gpus=1,
-        max_epochs=100,
         logger=wandb_logger,
-        log_every_n_steps=50,
         callbacks=callbacks,
-        precision=16,
-        # fast_dev_run=5,
-        auto_lr_find=True,
+        fast_dev_run=conf["trainer"]["fast_dev_run"],
+        default_root_dir=conf["trainer"]["default_root_dir"],
+        gpus=conf["trainer"]["gpus"],
+        max_epochs=conf["trainer"]["max_epochs"],
+        log_every_n_steps=conf["trainer"]["log_every_n_steps"],
+        precision=conf["trainer"]["precision"],
+        auto_lr_find=conf["trainer"]["auto_lr_find"],
     )
 
     wandb_logger.watch(model)
 
-    # this is used when automatically finding the learning rate
-    trainer.tune(
-        model, datamodule
-    )
+    if conf["trainer"]["auto_lr_find"]:
+        trainer.tune(model, datamodule)
+
     trainer.fit(model, datamodule)
 
 
 if __name__ == "__main__":
-    
-    _rasterio_best_practices = {
-        "GDAL_DISABLE_READDIR_ON_OPEN": "EMPTY_DIR",
-        "AWS_NO_SIGN_REQUEST": "YES",
-        "GDAL_MAX_RAW_BLOCK_CACHE_SIZE": "200000000",
-        "GDAL_SWATH_SIZE": "200000000",
-        "VSI_CURL_CACHE_SIZE": "200000000",
-    }
-    os.environ.update(_rasterio_best_practices)
 
+    # Read input args
+    args = docopt(__doc__)
+
+    # Load config file
+    with open(args["--cfg"], "r") as f:
+        cfg = yaml.safe_load(f)
 
     # set random seed for reproducibility
-    pl.seed_everything(12)
+    pl.seed_everything(cfg["program"]["seed"])
 
     # TRAIN
-    main()
+    main(cfg)
